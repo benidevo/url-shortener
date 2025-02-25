@@ -46,3 +46,6 @@ logs/
 tests/
 test_*.py
 *_test.py
+
+
+.idea

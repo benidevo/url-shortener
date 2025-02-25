@@ -1,10 +1,13 @@
+from app.repository import UrlRepository
+from sqlalchemy.orm import Session
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from pydantic import HttpUrl
 
 from app.models import UrlModel
+from app.db.objects import Url
 
 log = logging.getLogger(__name__)
 
@@ -41,7 +44,7 @@ class InMemoryUrlRepository(UrlRepository):
     def get(self, shortened_url: str) -> Optional[UrlModel]:
         return self._urls.get(shortened_url)
 
-    def list(self) -> list[UrlModel]:
+    def list(self) -> List[UrlModel]:
         result = self._urls.values()
         return result
 
@@ -50,3 +53,35 @@ class InMemoryUrlRepository(UrlRepository):
             return
 
         del self._urls[shortened_url]
+
+
+class SqlAlchemyUrlRepository(UrlRepository):
+    def __init__(self, db_session: Session):
+        self.session = db_session
+
+    def create(self, shortened_url: str, url: HttpUrl) -> UrlModel:
+        db_url = Url(
+            link=str(url),
+            short_link=shortened_url,
+        )
+        self.session.add(db_url)
+        self.session.commit()
+        return db_url.to_model()
+
+    def get(self, shortened_url: str) -> Optional[UrlModel]:
+        db_url = self.session.query(Url).filter(
+            Url.short_link == shortened_url).first()
+        if db_url:
+            return db_url.to_model()
+        return
+
+    def list(self) -> List[UrlModel]:
+        db_urls = self.session.query(Url).all()
+        return [url.to_model() for url in db_urls]
+
+    def delete(self, shortened_url: str) -> None:
+        db_url = self.session.query(Url).filter(
+            Url.short_link == shortened_url).first()
+        if db_url:
+            self.session.delete(db_url)
+            self.session.commit()
