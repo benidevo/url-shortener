@@ -65,3 +65,18 @@ class InMemoryAnalyticsRepository(AnalyticsRepository):
 
     def get_analytics_by_short_link(self, short_link: str) -> Optional[AnalyticsModel]:
         return self._analytics.get(short_link)
+
+
+class SqlAlchemyAnalyticsRepository(AnalyticsRepository):
+    def __ini__(self, db_session):
+        self.db_session = db_session
+
+    def record_click(
+        self,
+        click: ClickModel,
+        short_link: str,
+    ) -> AnalyticsModel:
+        raise NotImplementedError
+
+    def get_analytics_by_short_link(self, short_link):
+        raise NotImplementedError
