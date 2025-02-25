@@ -64,7 +64,7 @@ class SqlAlchemyUrlRepository(UrlRepository):
             short_link=shortened_url,
         )
         self.session.add(db_url)
-        self.session.commit()
+        self._save()
         return db_url.to_model()
 
     def get(self, shortened_url: str) -> Optional[UrlModel]:
@@ -83,4 +83,12 @@ class SqlAlchemyUrlRepository(UrlRepository):
             Url.short_link == shortened_url).first()
         if db_url:
             self.session.delete(db_url)
+            self._save()
+
+    def _save(self) -> None:
+        try:
             self.session.commit()
+        except Exception:
+            log.exception("Failed to save changes to database")
+            self.session.rollback()
+            raise

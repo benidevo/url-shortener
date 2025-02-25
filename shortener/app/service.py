@@ -31,7 +31,9 @@ class UrlShortenerService:
         return self.repository.list()
 
     def get_url(self, shortened_url: str) -> Optional[UrlModel]:
+        # inform analytics about the click
         return self.repository.get(shortened_url)
 
     def delete_url(self, shortened_url: str) -> None:
+        # inform analytics about the deletion
         self.repository.delete(shortened_url)
