@@ -10,6 +10,9 @@ down:
 down_volumes:
 	docker compose -f docker-compose.yaml down -v
 
+into_shortener:
+	docker compose -f docker-compose.yaml exec shortener bash
+
 shortener-format:
 	docker compose -f docker-compose.yaml exec shortener isort . && \
 	docker compose -f docker-compose.yaml exec shortener black . && \

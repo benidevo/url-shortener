@@ -20,9 +20,8 @@ if not DATABASE_URL:
     DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "securepassword")
     DB_HOST = os.getenv("DB_HOST", "localhost")  # For local development
     DB_PORT = os.getenv("DB_PORT", "5432")
-    DB_NAME = os.getenv("POSTGRES_DB", "urlshortener")
+    DB_NAME = os.getenv("POSTGRES_DB", "shortener")
     DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
 
 # Override the URL in alembic.ini
 config = context.config
@@ -64,7 +63,6 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        include_schemas=True,
     )
 
     with context.begin_transaction():
@@ -88,7 +86,6 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            include_schemas=True,
         )
 
         with context.begin_transaction():
