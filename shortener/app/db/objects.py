@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import Column, DateTime, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase
 
@@ -14,7 +15,7 @@ class Url(Base):
     id = Column(Integer, primary_key=True, index=True)
     link = Column(Text, nullable=False)
     short_link = Column(String(7), unique=True, index=True, nullable=False)
-    created_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.now)
 
     def to_model(self) -> UrlModel:
         return UrlModel(
@@ -28,7 +29,6 @@ class Url(Base):
         return Url(
             link=model.link,
             short_link=model.short_link,
-            created_at=model.created_at
         )
 
     def __repr__(self):

@@ -7,13 +7,14 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-securepassword}
       POSTGRES_DB: ${POSTGRES_DB:-shortener}
       PGDATA: /var/lib/postgresql/data/pgdata
-      POSTGRES_MULTIPLE_DATABASES: "shortener,analytics"
+      POSTGRES_MULTIPLE_DATABASES: "analytics"
     volumes:
       - postgres_data:/var/lib/postgresql/data/pgdata
+       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U shortener"]
+      test: ["CMD-SHELL", "pg_isready -U urlshortener -d shortener"]
       interval: 5s
       timeout: 5s
       retries: 5

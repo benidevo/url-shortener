@@ -18,7 +18,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     DB_USER = os.getenv("POSTGRES_USER", "urlshortener")
     DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "securepassword")
-    DB_HOST = os.getenv("DB_HOST", "localhost")  # For local development
+    DB_HOST = os.getenv("DB_HOST", "postgres")  # For local development
     DB_PORT = os.getenv("DB_PORT", "5432")
     DB_NAME = os.getenv("POSTGRES_DB", "shortener")
     DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
