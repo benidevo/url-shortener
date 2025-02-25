@@ -18,6 +18,7 @@ class AnalyticsRepository(ABC):
     def get_analytics_by_short_link(self, short_link: str) -> Optional[AnalyticsModel]:
         raise NotImplementedError
 
+
 example = {
     "example": AnalyticsModel(
         short_link="example",
@@ -28,9 +29,11 @@ example = {
                 city="New York",
                 country="United States",
             )
-        ]
+        ],
     )
 }
+
+
 class InMemoryAnalyticsRepository(AnalyticsRepository):
     _instance = None
     _analytics: Dict[str, AnalyticsModel] = example
