@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: url-shortener-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-urlshortener}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-securepassword}
+      POSTGRES_DB: ${POSTGRES_DB:-urlshortener}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U urlshortener"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - url-shortener-network
+
+  shortener:
+    build:
+      context: .
+      dockerfile: shortener/Dockerfile
+    container_name: url-shortener-service
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-urlshortener}:${POSTGRES_PASSWORD:-securepassword}@postgres:5432/${POSTGRES_DB:-urlshortener}
+      ANALYTICS_SERVICE_URL: analytics:8001
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - url-shortener-network
+
+  analytics:
+    build:
+      context: .
+      dockerfile: analytics/Dockerfile
+    container_name: url-shortener-analytics
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-urlshortener}:${POSTGRES_PASSWORD:-securepassword}@postgres:5432/${POSTGRES_DB:-urlshortener}
+    ports:
+      - "8001:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - url-shortener-network
+
+networks:
+  url-shortener-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
