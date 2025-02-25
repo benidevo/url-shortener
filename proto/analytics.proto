@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package analytics;
+
+
+message ClickModel {
+    string ip = 1;
+    string city = 2;
+    string country = 3;
+}
+
+message RecordClickRequest {
+    string short_link = 1;
+    ClickModel click = 2;
+}
+
+message RecordClickResponse {
+    bool success = 1;
+}
+
+service AnalyticsService {
+    rpc RecordClick(RecordClickRequest) returns (RecordClickResponse);
+}

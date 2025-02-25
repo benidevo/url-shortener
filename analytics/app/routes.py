@@ -1,9 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-
-from app.models import ResponseModel
 from app.dependencies import get_analytics_service
+from app.models import ResponseModel
 from app.service import AnalyticsService
-
+from fastapi import APIRouter, Depends, HTTPException, status
 
 router = APIRouter()
 

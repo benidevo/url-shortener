@@ -1,12 +1,11 @@
-from sqlalchemy.orm import Session
 import logging
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 
-from pydantic import HttpUrl
-
-from app.models import UrlModel
 from app.db.objects import Url
+from app.models import UrlModel
+from pydantic import HttpUrl
+from sqlalchemy.orm import Session
 
 log = logging.getLogger(__name__)
 

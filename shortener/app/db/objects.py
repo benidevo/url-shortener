@@ -1,8 +1,8 @@
 from datetime import datetime
-from sqlalchemy import Column, DateTime, Integer, String, Text
-from sqlalchemy.orm import DeclarativeBase
 
 from app.models import UrlModel
+from sqlalchemy import Column, DateTime, Integer, String, Text
+from sqlalchemy.orm import DeclarativeBase
 
 
 class Base(DeclarativeBase):

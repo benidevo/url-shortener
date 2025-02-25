@@ -1,7 +1,6 @@
+from app.models import AnalyticsModel, ClickModel
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.orm import DeclarativeBase
-
-from app.models import AnalyticsModel, ClickModel
 
 
 class Base(DeclarativeBase):

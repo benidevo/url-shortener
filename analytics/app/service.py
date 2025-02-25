@@ -1,4 +1,5 @@
 from typing import Optional
+
 from app.models import AnalyticsModel
 from app.repository import AnalyticsRepository
 

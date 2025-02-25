@@ -1,9 +1,8 @@
-from fastapi import Depends
-from sqlalchemy.orm import Session
-
+from app.db.session import SessionLocal
 from app.repository import SqlAlchemyUrlRepository, UrlRepository
 from app.service import UrlShortenerService
-from app.db.session import SessionLocal
+from fastapi import Depends
+from sqlalchemy.orm import Session
 
 
 def get_session():

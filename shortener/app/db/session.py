@@ -1,7 +1,7 @@
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-import os
 
 # Initialize engine once at module level
 db_url = os.getenv("DATABASE_URL")

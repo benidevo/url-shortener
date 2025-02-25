@@ -3,10 +3,9 @@ import hashlib
 from datetime import datetime
 from typing import Optional
 
-from pydantic import HttpUrl
-
 from app.models import UrlModel
 from app.repository import UrlRepository
+from pydantic import HttpUrl
 
 
 class UrlShortenerService:

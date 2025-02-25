@@ -1,7 +1,6 @@
-from fastapi import Depends
-
-from app.service import AnalyticsService
 from app.repository import AnalyticsRepository, InMemoryAnalyticsRepository
+from app.service import AnalyticsService
+from fastapi import Depends
 
 
 def get_repository() -> AnalyticsRepository:
