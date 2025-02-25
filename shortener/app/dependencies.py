@@ -1,11 +1,21 @@
 from fastapi import Depends
+from sqlalchemy.orm import Session
 
-from app.repository import InMemoryUrlRepository, UrlRepository
+from app.repository import SqlAlchemyUrlRepository, UrlRepository
 from app.service import UrlShortenerService
+from app.db.session import SessionLocal
 
 
-def get_repository() -> UrlRepository:
-    return InMemoryUrlRepository()
+def get_session():
+    session = SessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+def get_repository(session: Session = Depends(get_session)) -> UrlRepository:
+    return SqlAlchemyUrlRepository(db_session=session)
 
 
 def get_url_service(

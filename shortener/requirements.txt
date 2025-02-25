@@ -1,4 +1,9 @@
 fastapi[standard]==0.115.8
+
+SQLAlchemy==2.0.38
+psycopg2-binary==2.9.10
+alembic==1.14.1
+
 isort==6.0.0
 black==25.1.0
 mypy==1.15.0

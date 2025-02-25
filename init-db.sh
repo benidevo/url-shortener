@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+    CREATE DATABASE shortener;
+    CREATE DATABASE analytics;
+
+    GRANT ALL PRIVILEGES ON DATABASE shortener TO $POSTGRES_USER;
+    GRANT ALL PRIVILEGES ON DATABASE analytics TO $POSTGRES_USER;
+EOSQL
