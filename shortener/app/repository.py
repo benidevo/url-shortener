@@ -1,4 +1,3 @@
-from app.repository import UrlRepository
 from sqlalchemy.orm import Session
 import logging
 from abc import ABC, abstractmethod
