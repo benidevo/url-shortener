@@ -1,6 +1,13 @@
+import logging
+import os
+from threading import Thread
+
+from app.grpc.server import serve
+from app.repository import InMemoryAnalyticsRepository
+from app.routes import router
 from fastapi import FastAPI
 
-from app.routes import router
+logger = logging.getLogger(__name__)
 
 
 class AppFactory:
@@ -21,7 +28,28 @@ class AppFactory:
         AppFactory._configure_middleware(app)
         AppFactory._register_exception_handlers(app)
 
+        AppFactory.start_grpc_thread()
+
         return app
+
+    @staticmethod
+    def start_grpc_thread():
+        grpc_thread = Thread(target=AppFactory.start_grpc_server, daemon=True)
+        grpc_thread.start()
+
+    @staticmethod
+    def start_grpc_server():
+        grpc_port = int(os.environ.get("GRPC_PORT", 50051))
+        try:
+            repository = AppFactory._get_repository()
+            grpc_server = serve(repository, grpc_port)
+            grpc_server.wait_for_termination()
+        except Exception as e:
+            logger.error(f"Error starting gRPC server: {str(e)}")
+
+    @staticmethod
+    def _get_repository():
+        return InMemoryAnalyticsRepository()
 
     @staticmethod
     def _load_config():

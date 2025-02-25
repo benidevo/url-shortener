@@ -1,13 +1,10 @@
 import os
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, text
-from sqlalchemy import pool
-
 from alembic import context
 from app.db.objects import Url
-
 from dotenv import load_dotenv
+from sqlalchemy import engine_from_config, pool, text
 
 # Load environment variables from .env file (if present)
 load_dotenv()

@@ -52,8 +52,10 @@ services:
       - .env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-urlshortener}:${POSTGRES_PASSWORD:-securepassword}@postgres:5432/analytics
+      GRPC_PORT: 50051
     ports:
       - "8001:8000"
+      - "50051:50051"
     depends_on:
       postgres:
         condition: service_healthy

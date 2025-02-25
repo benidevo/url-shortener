@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Dict, Optional
 
-from app.models import ClickModel, AnalyticsModel
+from app.models import AnalyticsModel, ClickModel
 
 
 class AnalyticsRepository(ABC):
@@ -41,7 +41,6 @@ class InMemoryAnalyticsRepository(AnalyticsRepository):
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._analytics = example
         return cls._instance
 
     def record_click(

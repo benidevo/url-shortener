@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
-
 from app.dependencies import get_url_service
 from app.models import ResponseModel, UrlCreate, UrlModel
 from app.service import UrlShortenerService
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 
 router = APIRouter()
 
