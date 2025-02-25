@@ -34,7 +34,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends libpq5 && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy wheels from builder stage
 COPY --from=builder /app/wheels /wheels
 
 RUN pip install --no-cache-dir /wheels/*
