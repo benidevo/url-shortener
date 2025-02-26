@@ -27,3 +27,13 @@ analytics-format:
 	docker compose -f docker-compose.yaml exec analytics black . && \
 	docker compose -f docker-compose.yaml exec analytics flake8 . && \
 	docker compose -f docker-compose.yaml exec analytics mypy .
+
+db-init:
+	docker compose -f docker-compose.yaml exec postgres bash /docker-entrypoint-initdb.d/init-db.sh
+
+migrate:
+	docker compose -f docker-compose.yaml exec shortener alembic upgrade head && \
+	docker compose -f docker-compose.yaml exec analytics alembic upgrade head
+
+db-init-and-migrate: db-init migrate
+
