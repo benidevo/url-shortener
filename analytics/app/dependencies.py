@@ -12,6 +12,7 @@ def get_session():
     finally:
         session.close()
 
+
 def get_repository(session: Session = Depends(get_session)) -> AnalyticsRepository:
     return SqlAlchemyAnalyticsRepository(session)
 

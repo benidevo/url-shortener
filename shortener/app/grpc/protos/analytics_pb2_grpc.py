@@ -3,7 +3,7 @@
 import warnings
 
 import grpc
-from app.grpc import analytics_pb2 as analytics__pb2
+from app.grpc.protos import analytics_pb2 as analytics__pb2
 
 GRPC_GENERATED_VERSION = '1.70.0'
 GRPC_VERSION = grpc.__version__
