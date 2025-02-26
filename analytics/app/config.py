@@ -1,21 +1,21 @@
+import logging
+import sys
 from functools import lru_cache
+from pathlib import Path
 from typing import Optional
+
 from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings
-import logging
-import os
-import sys
-from logging.handlers import RotatingFileHandler
 
 
 class Settings(BaseSettings):
-    """Application settings configured from environment variables."""
 
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     LOG_DIR: str = "logs"
 
-    DATABASE_URL: PostgresDsn
+    ANALYTICS_DATABASE_URL: str
+    DATABASE_URL: Optional[str] = None
 
     BASE_URL: str = "http://localhost:8000"
     SERVICE_PORT: int = 8000
@@ -24,14 +24,33 @@ class Settings(BaseSettings):
 
     ENVIRONMENT: str = "development"
 
+    GRPC_PORT: int = 50051
+
+    def __post_init__(self):
+        if self.DATABASE_URL is None:
+            self.DATABASE_URL = self.ANALYTICS_DATABASE_URL
+
     class Config:
-        env_file = ".env"
+        project_root = None
+        current_dir = Path(__file__).parent
+
+        search_dir = current_dir
+        for _ in range(10):
+            if (search_dir / "docker-compose.yaml").exists() or (
+                search_dir / ".env.example"
+            ).exists():
+                project_root = search_dir
+                break
+            parent = search_dir.parent
+            if parent == search_dir:
+                break
+            search_dir = parent
+
+        env_file = str(project_root / ".env") if project_root else ".env"
         env_file_encoding = "utf-8"
         case_sensitive = True
 
     def configure_logging(self):
-        """Configure logging based on settings."""
-
         numeric_level = getattr(logging, self.LOG_LEVEL.upper(), logging.INFO)
 
         root_logger = logging.getLogger()
@@ -47,9 +66,8 @@ class Settings(BaseSettings):
 
         root_logger.addHandler(console_handler)
 
-        # Reduce noise from third-party libraries
-        # logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
-        # logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+        logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+        logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
         logging.info("Logging configured with level: %s", self.LOG_LEVEL)
 

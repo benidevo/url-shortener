@@ -1,5 +1,13 @@
+import logging
+from http import HTTPMethod as Method
+
+from app.exceptions import (catch_all_exception_handler,
+                            internal_server_error_handler)
 from app.routes import router
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+logger = logging.getLogger(__name__)
 
 
 class AppFactory:
@@ -7,8 +15,6 @@ class AppFactory:
 
     @staticmethod
     def create_app() -> FastAPI:
-        AppFactory._load_config()
-
         app = FastAPI(
             title="URL Shortener Service",
             description="API for shortening URLs",
@@ -23,26 +29,28 @@ class AppFactory:
         return app
 
     @staticmethod
-    def _load_config():
-        """Load application configuration."""
-        # Load from environment variables, config files, etc.
-        pass
-
-    @staticmethod
     def _register_routers(app: FastAPI):
-        """Register all application routers."""
         app.include_router(router, prefix="/api/v1", tags=["urls"])
 
     @staticmethod
     def _configure_middleware(app: FastAPI):
-        """Set up middleware components."""
-        # Add CORS, authentication, etc.
-        pass
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=[
+                Method.GET,
+                Method.POST,
+                Method.DELETE,
+                Method.HEAD,
+            ],
+            allow_headers=["*"],
+        )
 
     @staticmethod
     def _register_exception_handlers(app: FastAPI):
-        """Register custom exception handlers."""
-        pass
+        app.add_exception_handler(500, internal_server_error_handler)
+        app.add_exception_handler(Exception, catch_all_exception_handler)
 
 
 app = AppFactory.create_app()
