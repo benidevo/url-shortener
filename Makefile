@@ -13,6 +13,9 @@ down_volumes:
 into_shortener:
 	docker compose -f docker-compose.yaml exec shortener bash
 
+into_analytics:
+	docker compose -f docker-compose.yaml exec analytics bash
+
 shortener-format:
 	docker compose -f docker-compose.yaml exec shortener isort . && \
 	docker compose -f docker-compose.yaml exec shortener black . && \

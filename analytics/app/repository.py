@@ -1,8 +1,12 @@
+import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Dict, Optional
 
+from app.db.objects import Analytics, Click
 from app.models import AnalyticsModel, ClickModel
+
+logger = logging.getLogger(__name__)
 
 
 class AnalyticsRepository(ABC):
@@ -19,24 +23,11 @@ class AnalyticsRepository(ABC):
         raise NotImplementedError
 
 
-example = {
-    "example": AnalyticsModel(
-        short_link="example",
-        updated_at=datetime.now(),
-        clicks=[
-            ClickModel(
-                ip="127.0.0.1",
-                city="New York",
-                country="United States",
-            )
-        ],
-    )
-}
 
 
 class InMemoryAnalyticsRepository(AnalyticsRepository):
     _instance = None
-    _analytics: Dict[str, AnalyticsModel] = example
+    _analytics: Dict[str, AnalyticsModel] = {}
 
     def __new__(cls):
         if cls._instance is None:
@@ -67,15 +58,43 @@ class InMemoryAnalyticsRepository(AnalyticsRepository):
 
 
 class SqlAlchemyAnalyticsRepository(AnalyticsRepository):
-    def __ini__(self, db_session):
-        self.db_session = db_session
+    def __init__(self, db_session):
+        self.session = db_session
 
-    def record_click(
-        self,
-        click: ClickModel,
-        short_link: str,
-    ) -> AnalyticsModel:
-        raise NotImplementedError
+    def record_click(self, click: ClickModel, short_link: str) -> AnalyticsModel:
+        db_analytics = self.session.query(Analytics).filter(
+            Analytics.short_link == short_link
+        ).first()
 
-    def get_analytics_by_short_link(self, short_link):
-        raise NotImplementedError
+        if not db_analytics:
+            db_analytics = Analytics(
+                short_link=short_link,
+                clicks=[]
+            )
+            self.session.add(db_analytics)
+
+        db_click = Click.from_model(click)
+        db_analytics.clicks.append(db_click)
+        db_analytics.updated_at = datetime.now()
+
+        self._save()
+
+        return db_analytics.to_model()
+
+    def get_analytics_by_short_link(self, short_link: str) -> Optional[AnalyticsModel]:
+        db_analytics = self.session.query(Analytics).filter(
+            Analytics.short_link == short_link
+        ).first()
+
+        if not db_analytics:
+            return None
+
+        return db_analytics.to_model()
+
+    def _save(self) -> None:
+        try:
+            self.session.commit()
+        except Exception:
+            logger.exception("Failed to save changes to database")
+            self.session.rollback()
+            raise

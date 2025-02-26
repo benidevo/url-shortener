@@ -2,7 +2,7 @@ import os
 from logging.config import fileConfig
 
 from alembic import context
-from app.db.objects import Url
+from app.db.objects import Base
 from dotenv import load_dotenv
 from sqlalchemy import engine_from_config, pool
 
@@ -17,13 +17,18 @@ if not DATABASE_URL:
     DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "securepassword")
     DB_HOST = os.getenv("DB_HOST", "postgres")  # For local development
     DB_PORT = os.getenv("DB_PORT", "5432")
-    DB_NAME = os.getenv("POSTGRES_DB", "shortener")
+    DB_NAME = os.getenv("POSTGRES_DB", "analytics")
     DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # Override the URL in alembic.ini
 config = context.config
 if DATABASE_URL:
     config.set_main_option("sqlalchemy.url", DATABASE_URL)
+
+
+# this is the Alembic Config object, which provides
+# access to the values within the .ini file in use.
+config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -34,7 +39,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = Url.metadata
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -81,8 +86,7 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
+            connection=connection, target_metadata=target_metadata
         )
 
         with context.begin_transaction():
