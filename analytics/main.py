@@ -9,7 +9,8 @@ from app.config import Settings, get_settings
 from app.exceptions import (catch_all_exception_handler,
                             internal_server_error_handler)
 from app.grpc.server import serve
-from app.routes import router
+from app.routes.analytics import router as urls_router
+from app.routes.health import router as health_router
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,8 @@ class AppFactory:
 
     @staticmethod
     def _register_routers(app: FastAPI):
-        app.include_router(router, prefix="/api/v1", tags=["analytics"])
+        app.include_router(urls_router, prefix="/api/v1", tags=["analytics"])
+        app.include_router(health_router, tags=["health"])
 
     @staticmethod
     def _configure_middleware(app: FastAPI):
