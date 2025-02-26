@@ -1,8 +1,9 @@
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
 from app.db.session import SessionLocal
 from app.repository import AnalyticsRepository, SqlAlchemyAnalyticsRepository
 from app.service import AnalyticsService
-from fastapi import Depends
-from sqlalchemy.orm import Session
 
 
 def get_session():

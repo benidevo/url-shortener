@@ -4,10 +4,11 @@ import logging
 from datetime import datetime
 from typing import Optional
 
+from pydantic import HttpUrl
+
 from app.grpc.client import AnalyticsClient
 from app.models import UrlModel
 from app.repository import UrlRepository
-from pydantic import HttpUrl
 
 logger = logging.getLogger(__name__)
 
@@ -34,16 +35,25 @@ class UrlShortenerService:
     def get_all_urls(self) -> list[UrlModel]:
         return self.repository.list()
 
-    def get_url(self, shortened_url: str) -> Optional[UrlModel]:
+    def get_url(
+        self,
+        shortened_url: str,
+        request_ip: Optional[str] = None,
+        city: str = "unknown",
+        country: str = "unknown"
+    ) -> Optional[UrlModel]:
         try:
+            ip = request_ip if request_ip else "0.0.0.0"
+
             self.analytics_client.record_click(
                 short_link=shortened_url,
-                ip="238.343.564",
-                city="Eleme",
-                country="Nigeria",
+                ip=ip,
+                city=city,
+                country=country,
             )
         except Exception as e:
             logger.error(f"Error recording click: {str(e)}")
+
         return self.repository.get(shortened_url)
 
     def delete_url(self, shortened_url: str) -> None:

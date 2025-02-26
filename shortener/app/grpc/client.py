@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import ClassVar, Optional
 
 import grpc
+
 from app.config import Settings, get_settings
 from app.grpc.protos import analytics_pb2, analytics_pb2_grpc
 

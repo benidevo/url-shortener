@@ -4,7 +4,6 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
-from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings
 
 
@@ -12,12 +11,10 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    LOG_DIR: str = "logs"
 
     ANALYTICS_DATABASE_URL: str
     DATABASE_URL: Optional[str] = None
 
-    BASE_URL: str = "http://localhost:8000"
     SERVICE_PORT: int = 8000
 
     ANALYTICS_SERVICE_GRPC: str = "analytics:50051"
@@ -74,7 +71,6 @@ class Settings(BaseSettings):
 
 @lru_cache()
 def get_settings() -> Settings:
-    """Create and return a cached Settings instance."""
     settings = Settings()
     settings.configure_logging()
     return settings

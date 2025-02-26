@@ -5,16 +5,12 @@ from pydantic import BaseModel, Field, HttpUrl
 
 
 class UrlCreate(BaseModel):
-    url: HttpUrl
+    url: HttpUrl = Field(..., title="url", description="The URL to shorten")
 
 
 class UrlModel(BaseModel):
     link: HttpUrl = Field(..., title="link", description="The URL to shorten")
-    short_link: str = Field(
-        ...,
-        title="short_link",
-        description="The shortened URL"
-    )
+    short_link: str = Field(..., title="short_link", description="The shortened URL")
     created_at: datetime = Field(
         default_factory=datetime.now,
         title="created_at",
@@ -26,5 +22,9 @@ class UrlModel(BaseModel):
 
 
 class ResponseModel(BaseModel):
-    success: bool = True
-    data: Optional[Union[UrlModel, List[UrlModel]]] = None
+    success: bool = Field(
+        default=True, title="success", description="Whether the request was successful"
+    )
+    data: Optional[Union[UrlModel, List[UrlModel]]] = Field(
+        default=None, title="data", description="The data returned by the request"
+    )

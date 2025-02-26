@@ -1,11 +1,12 @@
 import logging
 from http import HTTPMethod as Method
 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from app.exceptions import (catch_all_exception_handler,
                             internal_server_error_handler)
 from app.routes import router
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,7 @@ class AppFactory:
         AppFactory._configure_middleware(app)
         AppFactory._register_exception_handlers(app)
 
+        logger.info("Shortener service started")
         return app
 
     @staticmethod

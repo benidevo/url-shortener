@@ -1,8 +1,9 @@
 from datetime import datetime
 
-from app.models import UrlModel
 from sqlalchemy import Column, DateTime, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase
+
+from app.models import UrlModel
 
 
 class Base(DeclarativeBase):
@@ -25,8 +26,8 @@ class Url(Base):
         )
 
     @classmethod
-    def from_model(cls, model: UrlModel):
-        return Url(
+    def from_model(cls, model: UrlModel) -> "Url":
+        return cls(
             link=model.link,
             short_link=model.short_link,
         )

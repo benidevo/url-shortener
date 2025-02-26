@@ -2,13 +2,14 @@ import logging
 from concurrent import futures
 from typing import Callable
 
-import app.grpc.protos.analytics_pb2 as analytics_pb2
 import grpc
+from grpc_reflection.v1alpha import reflection
+
+import app.grpc.protos.analytics_pb2 as analytics_pb2
 from app.grpc.protos.analytics_pb2_grpc import (
     AnalyticsServiceServicer, add_AnalyticsServiceServicer_to_server)
 from app.models import ClickModel
 from app.repository import AnalyticsRepository, SqlAlchemyAnalyticsRepository
-from grpc_reflection.v1alpha import reflection
 
 logger = logging.getLogger(__name__)
 
@@ -57,5 +58,5 @@ def serve(session_factory: Callable, port: int = 50052):
 
     server.add_insecure_port(f"[::]:{port}")
     server.start()
-    logger.info(f"gRPC server started on port {port}")
+    logger.info(f"Analytics gRPC server started on port {port}")
     server.wait_for_termination()

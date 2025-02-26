@@ -1,9 +1,10 @@
+from fastapi import Depends
+
 from app.config import Settings, get_settings
 from app.db.session import SessionLocal
 from app.grpc.client import AnalyticsClient, GrpcAnalyticsClient
 from app.repository import SqlAlchemyUrlRepository, UrlRepository
 from app.service import UrlShortenerService
-from fastapi import Depends
 
 
 def get_settings_dependency() -> Settings:
