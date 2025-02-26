@@ -4,7 +4,7 @@ containers:
     command:
       - "/cloud-sql-proxy"
       - "--port=5432"
-      - "PROJECT:REGION:INSTANCE"
+      - "url-shortener:us-central1:url-sql-db"
     securityContext:
       runAsNonRoot: true
     resources:
