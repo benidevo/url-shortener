@@ -2,13 +2,14 @@ import logging
 from http import HTTPMethod as Method
 from threading import Thread
 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from app.config import Settings, get_settings
 from app.exceptions import (catch_all_exception_handler,
                             internal_server_error_handler)
 from app.grpc.server import serve
 from app.routes import router
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,7 @@ class AppFactory:
 
         AppFactory.start_grpc_thread()
 
+        logger.info("Analytics service started")
         return app
 
     @staticmethod
@@ -75,4 +77,6 @@ class AppFactory:
     @staticmethod
     def _get_config() -> Settings:
         return get_settings()
+
+
 app = AppFactory.create_app()

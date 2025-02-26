@@ -1,7 +1,8 @@
+from fastapi import APIRouter, Depends, HTTPException, Path, status
+
 from app.dependencies import get_analytics_service
 from app.models import ResponseModel
 from app.service import AnalyticsService
-from fastapi import APIRouter, Depends, HTTPException, Path, status
 
 router = APIRouter()
 
@@ -17,4 +18,5 @@ def get_analytics(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No analytics entry for short link",
         )
+
     return ResponseModel(data=analytics)

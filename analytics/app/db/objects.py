@@ -1,8 +1,9 @@
 from datetime import datetime
 
-from app.models import AnalyticsModel, ClickModel
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import DeclarativeBase, relationship
+
+from app.models import AnalyticsModel, ClickModel
 
 
 class Base(DeclarativeBase):
@@ -18,7 +19,7 @@ class Click(Base):
     city = Column(String, index=True, default="")
     country = Column(String, index=True, default="")
 
-    def to_model(self):
+    def to_model(self) -> ClickModel:
         return ClickModel(
             ip=self.ip,
             city=self.city,
@@ -26,7 +27,7 @@ class Click(Base):
         )
 
     @classmethod
-    def from_model(cls, model: ClickModel):
+    def from_model(cls, model: ClickModel) -> "Click":
         return cls(
             ip=model.ip,
             city=model.city,
@@ -45,7 +46,7 @@ class Analytics(Base):
     updated_at = Column(DateTime, index=True, default=datetime.now)
     clicks = relationship("Click", cascade="all, delete-orphan")
 
-    def to_model(self):
+    def to_model(self) -> AnalyticsModel:
         return AnalyticsModel(
             short_link=self.short_link,
             updated_at=self.updated_at,
@@ -53,7 +54,7 @@ class Analytics(Base):
         )
 
     @classmethod
-    def from_model(cls, model: AnalyticsModel):
+    def from_model(cls, model: AnalyticsModel) -> "Analytics":
         return cls(
             short_link=model.short_link,
             updated_at=model.updated_at,

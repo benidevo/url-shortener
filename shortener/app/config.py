@@ -3,14 +3,12 @@ import sys
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    LOG_DIR: str = "logs"
 
     DATABASE_URL: str
 
