@@ -1,20 +1,21 @@
 import logging
 from concurrent import futures
+from typing import Callable
 
 import app.grpc.analytics_pb2 as analytics_pb2
 import grpc
 from app.grpc.analytics_pb2_grpc import (
     AnalyticsServiceServicer, add_AnalyticsServiceServicer_to_server)
 from app.models import ClickModel
-from app.repository import AnalyticsRepository
+from app.repository import AnalyticsRepository, SqlAlchemyAnalyticsRepository
 from grpc_reflection.v1alpha import reflection
 
 logger = logging.getLogger(__name__)
 
 
 class AnalyticsService(AnalyticsServiceServicer):
-    def __init__(self, repository: AnalyticsRepository):
-        self.repository = repository
+    def __init__(self, repository_factory: Callable):
+        self.repository: AnalyticsRepository = repository_factory()
 
     def RecordClick(self, request, context):
         try:
@@ -36,11 +37,15 @@ class AnalyticsService(AnalyticsServiceServicer):
             return analytics_pb2.RecordClickResponse(success=False)
 
 
-def serve(repository: AnalyticsRepository, port: int = 50052):
+def serve(session_factory: Callable, port: int = 50052):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
+    def get_repository():
+        session = session_factory()
+        return SqlAlchemyAnalyticsRepository(session)
+
     add_AnalyticsServiceServicer_to_server(
-        AnalyticsService(repository),
+        AnalyticsService(get_repository),
         server,
     )
 

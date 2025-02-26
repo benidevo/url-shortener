@@ -1,6 +1,8 @@
+from datetime import datetime
+
 from app.models import AnalyticsModel, ClickModel
-from sqlalchemy import Column, DateTime, Integer, String
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import DeclarativeBase, relationship
 
 
 class Base(DeclarativeBase):
@@ -11,9 +13,10 @@ class Click(Base):
     __tablename__ = "clicks"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    ip = Column(String, index=True)
-    city = Column(String, index=True)
-    country = Column(String, index=True)
+    analytics_id = Column(Integer, ForeignKey("analytics.id"), nullable=False)
+    ip = Column(String, index=True, default="")
+    city = Column(String, index=True, default="")
+    country = Column(String, index=True, default="")
 
     def to_model(self):
         return ClickModel(
@@ -39,7 +42,8 @@ class Analytics(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     short_link = Column(String, index=True, nullable=False)
-    updated_at = Column(DateTime, index=True)
+    updated_at = Column(DateTime, index=True, default=datetime.now)
+    clicks = relationship("Click", cascade="all, delete-orphan")
 
     def to_model(self):
         return AnalyticsModel(

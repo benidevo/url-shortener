@@ -48,6 +48,8 @@ services:
       context: .
       dockerfile: analytics/Dockerfile
     container_name: url-shortener-analytics
+    volumes:
+      - ./analytics:/app
     env_file:
       - .env
     environment:
