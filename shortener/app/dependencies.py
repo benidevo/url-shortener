@@ -4,7 +4,6 @@ from app.grpc.client import AnalyticsClient, GrpcAnalyticsClient
 from app.repository import SqlAlchemyUrlRepository, UrlRepository
 from app.service import UrlShortenerService
 from fastapi import Depends
-from sqlalchemy.orm import Session
 
 
 def get_settings_dependency() -> Settings:
@@ -19,7 +18,7 @@ def get_session():
         session.close()
 
 
-def get_repository(session: Session = Depends(get_session)) -> UrlRepository:
+def get_repository(session = Depends(get_session)) -> UrlRepository:
     return SqlAlchemyUrlRepository(db_session=session)
 
 

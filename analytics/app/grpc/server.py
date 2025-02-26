@@ -5,9 +5,7 @@ from typing import Callable
 import app.grpc.protos.analytics_pb2 as analytics_pb2
 import grpc
 from app.grpc.protos.analytics_pb2_grpc import (
-    AnalyticsServiceServicer,
-    add_AnalyticsServiceServicer_to_server,
-)
+    AnalyticsServiceServicer, add_AnalyticsServiceServicer_to_server)
 from app.models import ClickModel
 from app.repository import AnalyticsRepository, SqlAlchemyAnalyticsRepository
 from grpc_reflection.v1alpha import reflection

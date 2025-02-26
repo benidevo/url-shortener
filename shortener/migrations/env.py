@@ -1,24 +1,14 @@
-import os
 from logging.config import fileConfig
 
 from alembic import context
+from app.config import Settings, get_settings
 from app.db.objects import Url
-from dotenv import load_dotenv
 from sqlalchemy import engine_from_config, pool
 
-# Load environment variables from .env file (if present)
-load_dotenv()
+Config: Settings = get_settings()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = Config.DATABASE_URL
 
-# If not set in environment, fallback to constructed URL
-if not DATABASE_URL:
-    DB_USER = os.getenv("POSTGRES_USER", "urlshortener")
-    DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "securepassword")
-    DB_HOST = os.getenv("DB_HOST", "postgres")  # For local development
-    DB_PORT = os.getenv("DB_PORT", "5432")
-    DB_NAME = os.getenv("POSTGRES_DB", "shortener")
-    DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # Override the URL in alembic.ini
 config = context.config

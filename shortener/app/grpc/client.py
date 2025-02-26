@@ -1,13 +1,13 @@
 import logging
-import os
 from abc import ABC, abstractmethod
 from typing import ClassVar, Optional
 
 import grpc
+from app.config import Settings, get_settings
 from app.grpc.protos import analytics_pb2, analytics_pb2_grpc
 
 logger = logging.getLogger(__name__)
-
+Config : Settings = get_settings()
 
 class AnalyticsClient(ABC):
     @abstractmethod
@@ -33,7 +33,7 @@ class GrpcAnalyticsClient(AnalyticsClient):
 
     def __init__(self, target: Optional[str] = None):
         if target is None:
-            target = os.getenv("ANALYTICS_SERVICE_GRPC", "analytics:50051")
+            target = Config.ANALYTICS_SERVICE_GRPC
         self.target = target
 
         self._channel = grpc.insecure_channel(self.target)

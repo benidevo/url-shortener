@@ -1,21 +1,21 @@
 import logging
-import os
+from http import HTTPMethod as Method
 from threading import Thread
 
+from app.config import Settings, get_settings
+from app.exceptions import (catch_all_exception_handler,
+                            internal_server_error_handler)
 from app.grpc.server import serve
 from app.routes import router
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 logger = logging.getLogger(__name__)
 
 
 class AppFactory:
-    """Factory for creating configured FastAPI applications."""
-
     @staticmethod
     def create_app() -> FastAPI:
-        AppFactory._load_config()
-
         app = FastAPI(
             title="Analytics Service",
             description="API for analytics",
@@ -36,10 +36,10 @@ class AppFactory:
         grpc_thread = Thread(target=AppFactory.start_grpc_server, daemon=True)
         grpc_thread.start()
 
-
     @staticmethod
     def start_grpc_server():
-        grpc_port = int(os.environ.get("GRPC_PORT", 50051))
+        config = AppFactory._get_config()
+        grpc_port = config.GRPC_PORT
         try:
             from app.db.session import SessionLocal
 
@@ -48,28 +48,31 @@ class AppFactory:
         except Exception as e:
             logger.error(f"Error starting gRPC server: {str(e)}")
 
-
-    @staticmethod
-    def _load_config():
-        """Load application configuration."""
-        # Load from environment variables, config files, etc.
-        pass
-
     @staticmethod
     def _register_routers(app: FastAPI):
-        """Register all application routers."""
         app.include_router(router, prefix="/api/v1", tags=["analytics"])
 
     @staticmethod
     def _configure_middleware(app: FastAPI):
-        """Set up middleware components."""
-        # Add CORS, authentication, etc.
-        pass
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=[
+                Method.GET,
+                Method.POST,
+                Method.DELETE,
+                Method.HEAD,
+            ],
+            allow_headers=["*"],
+        )
 
     @staticmethod
     def _register_exception_handlers(app: FastAPI):
-        """Register custom exception handlers."""
-        pass
+        app.add_exception_handler(500, internal_server_error_handler)
+        app.add_exception_handler(Exception, catch_all_exception_handler)
 
-
+    @staticmethod
+    def _get_config() -> Settings:
+        return get_settings()
 app = AppFactory.create_app()
