@@ -1,15 +1,20 @@
 import base64
 import hashlib
+import logging
 from datetime import datetime
 from typing import Optional
 
+from app.grpc.client import AnalyticsClient
 from app.models import UrlModel
 from app.repository import UrlRepository
 from pydantic import HttpUrl
 
+logger = logging.getLogger(__name__)
+
 
 class UrlShortenerService:
-    def __init__(self, repository: UrlRepository):
+    def __init__(self, repository: UrlRepository, analytics_client: AnalyticsClient):
+        self.analytics_client = analytics_client
         self.repository = repository
 
     def shorten_url(self, url: HttpUrl) -> UrlModel:
@@ -30,9 +35,16 @@ class UrlShortenerService:
         return self.repository.list()
 
     def get_url(self, shortened_url: str) -> Optional[UrlModel]:
-        # inform analytics about the click
+        try:
+            self.analytics_client.record_click(
+                short_link=shortened_url,
+                ip="238.343.564",
+                city="Eleme",
+                country="Nigeria",
+            )
+        except Exception as e:
+            logger.error(f"Error recording click: {str(e)}")
         return self.repository.get(shortened_url)
 
     def delete_url(self, shortened_url: str) -> None:
-        # inform analytics about the deletion
         self.repository.delete(shortened_url)
