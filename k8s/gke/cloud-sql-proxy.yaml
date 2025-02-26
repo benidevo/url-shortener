@@ -1,0 +1,16 @@
+containers:
+  - name: cloud-sql-proxy
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.1.0
+    command:
+      - "/cloud-sql-proxy"
+      - "--port=5432"
+      - "PROJECT:REGION:INSTANCE"
+    securityContext:
+      runAsNonRoot: true
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi

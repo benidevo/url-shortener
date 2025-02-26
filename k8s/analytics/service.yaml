@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-service
+  namespace: url-shortener
+spec:
+  selector:
+    app: analytics
+  ports:
+  - port: 80
+    targetPort: 8000
+    name: http
+  - port: 50052
+    targetPort: 50051
+    name: grpc

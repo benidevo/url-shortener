@@ -21,22 +21,11 @@ def get_session():
 
 @router.get("/health")
 async def health_check() -> Dict:
-    """Basic health check endpoint.
-
-    Returns a simple status indicating the service is running.
-    This endpoint is used for basic liveness probes.
-    """
     return {"status": "ok", "service": "shortener"}
 
 
 @router.get("/readiness")
 async def readiness_check(session=Depends(get_session)) -> Dict:
-    """Readiness check endpoint.
-
-    Verifies that the service can connect to its database.
-    This endpoint is used for readiness probes to determine
-    if the service is ready to accept traffic.
-    """
     try:
         result = session.execute(text("SELECT 1"))
         result.scalar()
