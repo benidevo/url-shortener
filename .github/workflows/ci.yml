@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r shortener/requirements.txt
+        pip install -r analytics/requirements.txt
+
+    - name: Format check
+      run: |
+        cd shortener && black --check .
+        cd ../analytics && black --check .
+
+    - name: Lint check
+      run: |
+        cd shortener && ruff check .
+        cd ../analytics && ruff check .
+
+    - name: Type check
+      run: |
+        cd shortener && mypy .
+        cd ../analytics && mypy .
+
+    - name: Run tests
+      run: |
+        cp .env.example .env
+        docker compose up -d postgres redis
+        sleep 10
+        docker compose up --build -d shortener analytics
+        sleep 15
+        docker compose exec shortener alembic upgrade head
+        docker compose exec analytics alembic upgrade head
+        docker compose exec shortener python -m pytest tests/ -v
+        docker compose exec analytics python -m pytest tests/ -v
+
+    - name: Cleanup
+      if: always()
+      run: docker compose down -v

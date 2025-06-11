@@ -56,3 +56,19 @@ migrate:
 	docker compose -f docker-compose.yaml exec analytics alembic upgrade head
 
 db-init-and-migrate: db-init migrate
+
+shortener-test:
+	docker compose -f docker-compose.yaml exec shortener python -m pytest tests/ -v
+
+analytics-test:
+	docker compose -f docker-compose.yaml exec analytics python -m pytest tests/ -v
+
+test: shortener-test analytics-test
+
+shortener-test-cov:
+	docker compose -f docker-compose.yaml exec shortener python -m pytest tests/ -v --cov=app --cov-report=term-missing
+
+analytics-test-cov:
+	docker compose -f docker-compose.yaml exec analytics python -m pytest tests/ -v --cov=app --cov-report=term-missing
+
+test-cov: shortener-test-cov analytics-test-cov

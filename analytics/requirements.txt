@@ -12,3 +12,6 @@ grpcio-reflection==1.70.0
 ruff==0.8.6
 black==25.1.0
 mypy==1.15.0
+
+pytest==8.3.4
+pytest-asyncio==0.24.0

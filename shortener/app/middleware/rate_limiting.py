@@ -113,7 +113,7 @@ def get_client_identifier(request: Request) -> str:
     return _extract_real_ip(request)
 
 
-async def rate_limit_middleware(request: Request, call_next):
+async def rate_limit_middleware(request: Request, call_next) -> Any:
     """
     FastAPI middleware for rate limiting.
     """

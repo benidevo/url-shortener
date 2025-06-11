@@ -23,15 +23,17 @@ class UrlShortenerService:
         self.repository = repository
 
     def shorten_url(self, url: HttpUrl) -> UrlModel:
+        existing_url = self.repository.find_by_url(url)
+        if existing_url:
+            logger.info(f"URL already exists: {url} -> {existing_url.short_link}")
+            return existing_url
+
         for attempt in range(self.MAX_RETRIES):
             shortened_url = self._generate_short_url(url)
 
             existing = self.repository.get(shortened_url)
             if not existing:
                 return self.repository.create(shortened_url=shortened_url, url=url)
-            elif str(existing.link) == str(url):
-                logger.info(f"URL already shortened: {url} -> {shortened_url}")
-                return existing
             else:
                 logger.warning(
                     f"Collision detected for {shortened_url}, "
@@ -75,11 +77,21 @@ class UrlShortenerService:
         try:
             ip = request_ip if request_ip else "0.0.0.0"
 
-            task = asyncio.create_task(
-                self._record_click_with_error_handling(shortened_url, ip, city, country)
-            )
-            # Don't await the task to keep it fire-and-forget
-            task.add_done_callback(lambda _: None)
+            # Check if we're in an event loop context
+            try:
+                loop = asyncio.get_running_loop()
+                task = loop.create_task(
+                    self._record_click_with_error_handling(
+                        shortened_url, ip, city, country
+                    )
+                )
+                # Add callback to handle any exceptions and prevent warnings
+                task.add_done_callback(
+                    lambda t: t.exception() if not t.cancelled() else None
+                )
+            except RuntimeError:
+                # No event loop running, fall back to sync
+                self._record_click_sync(shortened_url, request_ip, city, country)
         except Exception as e:
             logger.warning(
                 f"Failed to create async analytics task: {e!s}, falling back to sync"

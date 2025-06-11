@@ -16,7 +16,6 @@ TRUSTED_PROXY_NETWORKS = [
 ]
 
 # Cache Configuration
-CACHE_MAX_SIZE = 1000
 CACHE_TTL_SECONDS = 300  # 5 minutes
 
 # gRPC Client Timeouts and Retries

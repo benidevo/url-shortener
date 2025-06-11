@@ -3,9 +3,27 @@ import sys
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.constants import DIRECTORY_SEARCH_DEPTH
+
+
+def _get_env_file() -> str:
+    """Get the path to the .env file by searching up the directory tree."""
+    current_dir = Path(__file__).parent
+    search_dir = current_dir
+
+    for _ in range(DIRECTORY_SEARCH_DEPTH):
+        if (search_dir / "docker-compose.yaml").exists() or (
+            search_dir / ".env.example"
+        ).exists():
+            return str(search_dir / ".env")
+        parent = search_dir.parent
+        if parent == search_dir:
+            break
+        search_dir = parent
+
+    return ".env"
 
 
 class Settings(BaseSettings):
@@ -24,25 +42,16 @@ class Settings(BaseSettings):
     CACHE_MAX_SIZE: int = 1000
     CACHE_TTL_SECONDS: int = 300  # 5 minutes
 
-    class Config:
-        project_root = None
-        current_dir = Path(__file__).parent
+    REDIS_URL: str = "redis://redis:6379/0"
+    REDIS_CONNECTION_POOL_SIZE: int = 10
+    REDIS_SOCKET_CONNECT_TIMEOUT: int = 5
+    REDIS_SOCKET_TIMEOUT: int = 5
 
-        search_dir = current_dir
-        for _ in range(DIRECTORY_SEARCH_DEPTH):
-            if (search_dir / "docker-compose.yaml").exists() or (
-                search_dir / ".env.example"
-            ).exists():
-                project_root = search_dir
-                break
-            parent = search_dir.parent
-            if parent == search_dir:
-                break
-            search_dir = parent
-
-        env_file = str(project_root / ".env") if project_root else ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = True
+    model_config = SettingsConfigDict(
+        env_file=_get_env_file(),
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+    )
 
     def configure_logging(self):
         numeric_level = getattr(logging, self.LOG_LEVEL.upper(), logging.INFO)

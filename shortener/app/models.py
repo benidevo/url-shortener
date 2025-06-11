@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator
@@ -82,8 +82,8 @@ class UrlCreate(BaseModel):
 class UrlModel(BaseModel):
     link: HttpUrl = Field(..., title="link", description="The URL to shorten")
     short_link: str = Field(..., title="short_link", description="The shortened URL")
-    created_at: datetime = Field(
-        default_factory=datetime.now,
+    created_at: datetime | None = Field(
+        default_factory=lambda: datetime.now(UTC),
         title="created_at",
         description="The date and time the URL was shortened",
     )

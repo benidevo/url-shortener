@@ -21,6 +21,22 @@ services:
     networks:
       - url-shortener-network
 
+  redis:
+    image: redis:7.2-alpine
+    container_name: url-shortener-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - url-shortener-network
+    volumes:
+      - redis_data:/data
+
   shortener:
     build:
       context: .
@@ -33,10 +49,13 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-urlshortener}:${POSTGRES_PASSWORD:-securepassword}@postgres:5432/shortener
       ANALYTICS_SERVICE_URL: analytics:8001
+      REDIS_URL: redis://redis:6379/0
     ports:
       - "8000:8000"
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     restart: unless-stopped
     networks:
@@ -70,4 +89,6 @@ networks:
 
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
     driver: local
