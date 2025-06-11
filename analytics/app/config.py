@@ -2,7 +2,6 @@ import logging
 import sys
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional
 
 from pydantic_settings import BaseSettings
 
@@ -13,7 +12,7 @@ class Settings(BaseSettings):
     LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
     ANALYTICS_DATABASE_URL: str
-    DATABASE_URL: Optional[str] = None
+    DATABASE_URL: str | None = None
 
     SERVICE_PORT: int = 8000
 
@@ -69,8 +68,8 @@ class Settings(BaseSettings):
         logging.info("Logging configured with level: %s", self.LOG_LEVEL)
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
-    settings = Settings()
+    settings = Settings()  # type: ignore[call-arg]
     settings.configure_logging()
     return settings

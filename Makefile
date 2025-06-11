@@ -16,17 +16,37 @@ into_shortener:
 into_analytics:
 	docker compose -f docker-compose.yaml exec analytics bash
 
+shortener-lint:
+	docker compose -f docker-compose.yaml exec shortener ruff check .
+
+analytics-lint:
+	docker compose -f docker-compose.yaml exec analytics ruff check .
+
+lint: shortener-lint analytics-lint
+
 shortener-format:
-	docker compose -f docker-compose.yaml exec shortener isort . && \
-	docker compose -f docker-compose.yaml exec shortener black . && \
-	docker compose -f docker-compose.yaml exec shortener flake8 . && \
-	docker compose -f docker-compose.yaml exec shortener mypy .
+	docker compose -f docker-compose.yaml exec shortener ruff check --fix . && \
+	docker compose -f docker-compose.yaml exec shortener black .
 
 analytics-format:
-	docker compose -f docker-compose.yaml exec analytics isort . && \
-	docker compose -f docker-compose.yaml exec analytics black . && \
-	docker compose -f docker-compose.yaml exec analytics flake8 . && \
+	docker compose -f docker-compose.yaml exec analytics ruff check --fix . && \
+	docker compose -f docker-compose.yaml exec analytics black .
+
+format: shortener-format analytics-format
+
+shortener-typecheck:
+	docker compose -f docker-compose.yaml exec shortener mypy .
+
+analytics-typecheck:
 	docker compose -f docker-compose.yaml exec analytics mypy .
+
+typecheck: shortener-typecheck analytics-typecheck
+
+shortener-check: shortener-lint shortener-typecheck
+
+analytics-check: analytics-lint analytics-typecheck
+
+check: lint typecheck
 
 db-init:
 	docker compose -f docker-compose.yaml exec postgres bash /docker-entrypoint-initdb.d/init-db.sh
@@ -36,4 +56,3 @@ migrate:
 	docker compose -f docker-compose.yaml exec analytics alembic upgrade head
 
 db-init-and-migrate: db-init migrate
-

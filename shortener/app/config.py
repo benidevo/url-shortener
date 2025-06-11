@@ -60,8 +60,8 @@ class Settings(BaseSettings):
         logging.info("Logging configured with level: %s", self.LOG_LEVEL)
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
-    settings = Settings()
+    settings = Settings()  # type: ignore[call-arg]
     settings.configure_logging()
     return settings

@@ -1,7 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, Optional
 
 from app.db.objects import Analytics, Click
 from app.models import AnalyticsModel, ClickModel
@@ -19,13 +18,13 @@ class AnalyticsRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_analytics_by_short_link(self, short_link: str) -> Optional[AnalyticsModel]:
+    def get_analytics_by_short_link(self, short_link: str) -> AnalyticsModel | None:
         raise NotImplementedError
 
 
 class InMemoryAnalyticsRepository(AnalyticsRepository):
     _instance = None
-    _analytics: Dict[str, AnalyticsModel] = {}
+    _analytics: dict[str, AnalyticsModel] = {}
 
     def __new__(cls):
         if cls._instance is None:
@@ -51,7 +50,7 @@ class InMemoryAnalyticsRepository(AnalyticsRepository):
         existing_analytics.updated_at = datetime.now()
         return existing_analytics
 
-    def get_analytics_by_short_link(self, short_link: str) -> Optional[AnalyticsModel]:
+    def get_analytics_by_short_link(self, short_link: str) -> AnalyticsModel | None:
         return self._analytics.get(short_link)
 
 
@@ -76,9 +75,9 @@ class SqlAlchemyAnalyticsRepository(AnalyticsRepository):
 
         self._save()
 
-        return db_analytics.to_model()
+        return db_analytics.to_model()  # type: ignore[no-any-return]
 
-    def get_analytics_by_short_link(self, short_link: str) -> Optional[AnalyticsModel]:
+    def get_analytics_by_short_link(self, short_link: str) -> AnalyticsModel | None:
         db_analytics = (
             self.session.query(Analytics)
             .filter(Analytics.short_link == short_link)
@@ -88,7 +87,7 @@ class SqlAlchemyAnalyticsRepository(AnalyticsRepository):
         if not db_analytics:
             return None
 
-        return db_analytics.to_model()
+        return db_analytics.to_model()  # type: ignore[no-any-return]
 
     def _save(self) -> None:
         try:

@@ -30,7 +30,7 @@ class AnalyticsClient(ABC):
 
     @classmethod
     @abstractmethod
-    def get_instance(cls, target: Optional[str]) -> "AnalyticsClient":
+    def get_instance(cls, target: str | None) -> "AnalyticsClient":
         raise NotImplementedError
 
 
@@ -48,14 +48,14 @@ class GrpcAnalyticsClient(AnalyticsClient):
     TIMEOUT = 2.0  # seconds
 
     @classmethod
-    def get_instance(cls, target: Optional[str]) -> "AnalyticsClient":
+    def get_instance(cls, target: str | None) -> "AnalyticsClient":
         if not cls._instance:
             with cls._lock:
                 if not cls._instance:
                     cls._instance = cls(target)
         return cls._instance
 
-    def __init__(self, target: Optional[str] = None):
+    def __init__(self, target: str | None = None):
         if target is None:
             target = Config.ANALYTICS_SERVICE_GRPC
         self.target = target
@@ -217,7 +217,7 @@ class GrpcAnalyticsClient(AnalyticsClient):
                     logger.warning(
                         f"Unexpected error recording click (attempt "
                         f"{attempt + 1}/{self.MAX_RETRIES}): "
-                        f"{str(e)}. Retrying in {retry_delay}s..."
+                        f"{e!s}. Retrying in {retry_delay}s..."
                     )
                     time.sleep(retry_delay)
                     retry_delay = min(retry_delay * 2, self.MAX_RETRY_DELAY)

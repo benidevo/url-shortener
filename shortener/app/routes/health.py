@@ -1,5 +1,4 @@
 import logging
-from typing import Dict
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.exc import SQLAlchemyError
@@ -20,18 +19,18 @@ def get_session():
 
 
 @router.get("/health")
-async def health_check() -> Dict:
+async def health_check() -> dict:
     return {"status": "ok", "service": "shortener"}
 
 
 @router.get("/readiness")
-async def readiness_check(session=Depends(get_session)) -> Dict:
+async def readiness_check(session=Depends(get_session)) -> dict:
     try:
         result = session.execute(text("SELECT 1"))
         result.scalar()
         db_status = "ok"
     except SQLAlchemyError as e:
-        logger.error(f"Database connectivity check failed: {str(e)}")
+        logger.error(f"Database connectivity check failed: {e!s}")
         db_status = "error"
 
     status = "ok" if db_status == "ok" else "error"

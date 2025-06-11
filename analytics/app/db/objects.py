@@ -54,8 +54,8 @@ class Analytics(Base):
 
     def to_model(self) -> AnalyticsModel:
         return AnalyticsModel(
-            short_link=self.short_link,
-            updated_at=self.updated_at,
+            short_link=self.short_link,  # type: ignore[arg-type]
+            updated_at=self.updated_at,  # type: ignore[arg-type]
             clicks=[click.to_model() for click in self.clicks],
         )
 

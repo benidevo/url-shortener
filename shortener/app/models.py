@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List, Optional, Union
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator
@@ -97,6 +96,6 @@ class ResponseModel(BaseModel):
     success: bool = Field(
         default=True, title="success", description="Whether the request was successful"
     )
-    data: Optional[Union[UrlModel, List[UrlModel]]] = Field(
+    data: UrlModel | list[UrlModel] | None = Field(
         default=None, title="data", description="The data returned by the request"
     )

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -17,7 +16,7 @@ class ClickModel(BaseModel):
 
 class AnalyticsModel(BaseModel):
     short_link: str = Field(..., title="short_link", description="The shortened URL")
-    clicks: List[ClickModel] = Field(..., title="clicks", description="The clicks")
+    clicks: list[ClickModel] = Field(..., title="clicks", description="The clicks")
     updated_at: datetime = Field(
         default_factory=datetime.now,
         title="updated_at",
@@ -29,6 +28,6 @@ class ResponseModel(BaseModel):
     success: bool = Field(
         default=True, title="success", description="Whether the request was successful"
     )
-    data: Optional[Union[AnalyticsModel, List[AnalyticsModel]]] = Field(
+    data: AnalyticsModel | list[AnalyticsModel] | None = Field(
         default=None, title="data", description="The data returned by the request"
     )

@@ -3,7 +3,6 @@ import hashlib
 import logging
 import secrets
 from datetime import datetime
-from typing import Optional
 
 from pydantic import HttpUrl
 
@@ -60,10 +59,10 @@ class UrlShortenerService:
     def get_url(
         self,
         shortened_url: str,
-        request_ip: Optional[str] = None,
+        request_ip: str | None = None,
         city: str = "unknown",
         country: str = "unknown",
-    ) -> Optional[UrlModel]:
+    ) -> UrlModel | None:
         try:
             ip = request_ip if request_ip else "0.0.0.0"
 
@@ -74,7 +73,7 @@ class UrlShortenerService:
                 country=country,
             )
         except Exception as e:
-            logger.error(f"Error recording click: {str(e)}")
+            logger.error(f"Error recording click: {e!s}")
 
         return self.repository.get(shortened_url)
 

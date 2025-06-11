@@ -1,7 +1,7 @@
+import builtins
 import logging
 import time
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
 
 from pydantic import HttpUrl
 from sqlalchemy.exc import DatabaseError, IntegrityError, OperationalError
@@ -18,7 +18,7 @@ class UrlRepository(ABC):
     def create(self, shortened_url: str, url: HttpUrl) -> UrlModel:
         raise NotImplementedError
 
-    def get(self, shortened_url: str) -> Optional[UrlModel]:
+    def get(self, shortened_url: str) -> UrlModel | None:
         raise NotImplementedError
 
     def list(self) -> list[UrlModel]:
@@ -30,7 +30,7 @@ class UrlRepository(ABC):
 
 class InMemoryUrlRepository(UrlRepository):
     _instance = None
-    _urls: Dict[str, UrlModel] = {}
+    _urls: dict[str, UrlModel] = {}
 
     def __new__(cls):
         if cls._instance is None:
@@ -42,10 +42,10 @@ class InMemoryUrlRepository(UrlRepository):
         self._urls[shortened_url] = url_model
         return url_model
 
-    def get(self, shortened_url: str) -> Optional[UrlModel]:
+    def get(self, shortened_url: str) -> UrlModel | None:
         return self._urls.get(shortened_url)
 
-    def list(self) -> List[UrlModel]:
+    def list(self) -> list[UrlModel]:
         return list(self._urls.values())
 
     def delete(self, shortened_url: str) -> None:
@@ -70,12 +70,10 @@ class SqlAlchemyUrlRepository(UrlRepository):
                 return existing
             else:
                 # Different URL with same short code. This is a collision
-                raise IntegrityError(  # type: ignore
-                    f"Short URL '{shortened_url}' already exists "
-                    f"for a different URL",
-                    None,
-                    None,
+                error_msg = (
+                    f"Short URL '{shortened_url}' already exists for a different URL"
                 )
+                raise IntegrityError(error_msg, params=None, orig=None)  # type: ignore[arg-type]
 
         db_url = Url(
             link=str(url),
@@ -96,23 +94,23 @@ class SqlAlchemyUrlRepository(UrlRepository):
                 return existing
             raise
 
-    def get(self, shortened_url: str) -> Optional[UrlModel]:
+    def get(self, shortened_url: str) -> UrlModel | None:
         return self._execute_with_retry(  # type: ignore
             lambda: self._get_impl(shortened_url), "get URL"
         )
 
-    def _get_impl(self, shortened_url: str) -> Optional[UrlModel]:
+    def _get_impl(self, shortened_url: str) -> UrlModel | None:
         db_url = self.session.query(Url).filter(Url.short_link == shortened_url).first()
         if db_url:
             return db_url.to_model()
         return None
 
-    def list(self) -> List[UrlModel]:
+    def list(self) -> list[UrlModel]:
         return self._execute_with_retry(  # type: ignore
             lambda: self._list_impl(), "list URLs"
         )
 
-    def _list_impl(self) -> List[UrlModel]:
+    def _list_impl(self) -> builtins.list[UrlModel]:
         db_urls = self.session.query(Url).all()
         return [url.to_model() for url in db_urls]
 

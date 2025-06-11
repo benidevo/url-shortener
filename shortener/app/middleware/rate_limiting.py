@@ -2,7 +2,7 @@ import logging
 import time
 from collections import defaultdict, deque
 from threading import Lock
-from typing import Any, Dict, Tuple
+from typing import Any
 
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
@@ -17,12 +17,12 @@ class SlidingWindowRateLimiter:
     """
 
     def __init__(self):
-        self._requests: Dict[str, deque] = defaultdict(deque)
+        self._requests: dict[str, deque] = defaultdict(deque)
         self._lock = Lock()
 
     def is_allowed(
         self, identifier: str, limit: int, window_seconds: int
-    ) -> Tuple[bool, Dict[str, Any]]:
+    ) -> tuple[bool, dict[str, Any]]:
         """
         Check if a request is allowed based on rate limits.
 
@@ -162,7 +162,7 @@ async def rate_limit_middleware(request: Request, call_next):
         return response
 
     except Exception as e:
-        logger.error(f"Error in rate limiting middleware: {str(e)}")
+        logger.error(f"Error in rate limiting middleware: {e!s}")
         return await call_next(request)
 
 
@@ -175,4 +175,4 @@ def cleanup_rate_limiter():
         rate_limiter.cleanup_old_entries()
         logger.debug("Rate limiter cleanup completed")
     except Exception as e:
-        logger.error(f"Error during rate limiter cleanup: {str(e)}")
+        logger.error(f"Error during rate limiter cleanup: {e!s}")

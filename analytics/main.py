@@ -48,7 +48,7 @@ class AppFactory:
             grpc_server = serve(SessionLocal, grpc_port)
             grpc_server.wait_for_termination()
         except Exception as e:
-            logger.error(f"Error starting gRPC server: {str(e)}")
+            logger.error(f"Error starting gRPC server: {e!s}")
 
     @staticmethod
     def _register_routers(app: FastAPI):

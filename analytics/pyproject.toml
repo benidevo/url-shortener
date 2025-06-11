@@ -1,0 +1,122 @@
+[tool.poetry]
+name = "analytics-service"
+version = "0.1.0"
+description = "Analytics service for URL shortener"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = {extras = ["standard"], version = "^0.115.8"}
+pydantic-settings = "^2.8.0"
+sqlalchemy = "^2.0.38"
+psycopg2-binary = "^2.9.10"
+alembic = "^1.14.1"
+grpcio = "^1.70.0"
+grpcio-tools = "^1.70.0"
+grpcio-reflection = "^1.70.0"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8.6"
+black = "^25.1.0"
+mypy = "^1.15.0"
+pytest = "^8.3.5"
+pytest-asyncio = "^0.25.2"
+pytest-cov = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+extend-exclude = [
+    "migrations/",
+    "app/grpc/protos/*_pb2*.py",
+    "__pycache__",
+    ".venv",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+    "ARG",  # flake8-unused-arguments
+    "TID",  # flake8-tidy-imports
+    "SIM",  # flake8-simplify
+    "TCH",  # flake8-type-checking
+    "DTZ",  # flake8-datetimez
+    "ERA",  # eradicate
+    "RUF",  # Ruff-specific rules
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "ARG001", # unused function argument
+    "ARG002", # unused method argument
+    "TC001",  # typing-only first party import
+    "TC002",  # typing-only third party import
+    "TC003",  # typing-only standard library import
+    "B008",   # Do not perform function calls in argument defaults (FastAPI pattern)
+    "B904",   # Use raise from in except blocks (not always needed)
+    "DTZ005", # Datetime without timezone (we handle this appropriately)
+    "SIM103", # Return condition directly (sometimes less readable)
+    "SIM105", # Use contextlib.suppress (not always clearer)
+    "RUF012", # Mutable class attributes should use ClassVar (not always needed)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"migrations/*" = ["E501", "ERA001"]
+"app/grpc/protos/*" = ["ALL"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+extend-exclude = '''
+/(
+  # directories
+  \.git
+  | \.mypy_cache
+  | \.pytest_cache
+  | __pycache__
+  | migrations
+  | app/grpc/protos
+)/
+'''
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "grpc.*",
+    "google.*",
+    "app.grpc.protos.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "migrations.*"
+ignore_errors = true

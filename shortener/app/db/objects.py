@@ -35,4 +35,4 @@ class Url(Base):
         )
 
     def __repr__(self):
-        return f"Url(id={self.id}, link={self.link}, short_link={self.short_link}, created_at={self.created_at})"  # noqa
+        return f"Url(id={self.id}, link={self.link}, short_link={self.short_link}, created_at={self.created_at})"

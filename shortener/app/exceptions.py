@@ -11,7 +11,7 @@ async def internal_server_error_handler(request: Request, exc: Exception):
     error_id = str(uuid.uuid4())
 
     logger.error(
-        f"Internal Server Error [ID: {error_id}]: {str(exc)}",
+        f"Internal Server Error [ID: {error_id}]: {exc!s}",
         exc_info=True,
         extra={
             "error_id": error_id,
@@ -35,7 +35,7 @@ async def catch_all_exception_handler(request: Request, exc: Exception):
     error_id = str(uuid.uuid4())
 
     logger.error(
-        f"Unhandled Exception [ID: {error_id}]: {str(exc)}",
+        f"Unhandled Exception [ID: {error_id}]: {exc!s}",
         exc_info=True,
         extra={
             "error_id": error_id,

@@ -1,6 +1,6 @@
 import logging
+from collections.abc import Callable
 from concurrent import futures
-from typing import Callable
 
 import grpc
 from grpc_reflection.v1alpha import reflection
@@ -34,9 +34,9 @@ class AnalyticsService(AnalyticsServiceServicer):
 
             return analytics_pb2.RecordClickResponse(success=True)
         except Exception as e:
-            logger.exception(f"Error recording click: {str(e)}")
+            logger.exception(f"Error recording click: {e!s}")
             context.set_code(grpc.StatusCode.INTERNAL)
-            context.set_details(f"Error recording click: {str(e)}")
+            context.set_details(f"Error recording click: {e!s}")
             return analytics_pb2.RecordClickResponse(success=False)
 
 

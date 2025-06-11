@@ -1,6 +1,5 @@
 import ipaddress
 import logging
-from typing import List
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Request, status
 
@@ -21,7 +20,7 @@ def shorten_url(
     try:
         shorten_url: UrlModel = service.shorten_url(url=payload.url)
     except Exception as e:
-        logger.error(f"Error shortening URL: {str(e)}")
+        logger.error(f"Error shortening URL: {e!s}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Something went wrong",
@@ -35,7 +34,7 @@ def list_urls(service: UrlShortenerService = Depends(get_url_service)):
     try:
         shortened_urls = service.get_all_urls()
     except Exception as e:
-        logger.error(f"Error listing URLs: {str(e)}")
+        logger.error(f"Error listing URLs: {e!s}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Something went wrong",
@@ -109,7 +108,7 @@ def _extract_real_ip(request: Request) -> str:
     return direct_ip
 
 
-def _is_trusted_proxy(ip_address: str, trusted_ranges: List[str]) -> bool:
+def _is_trusted_proxy(ip_address: str, trusted_ranges: list[str]) -> bool:
     """Check if an IP address is in the trusted proxy ranges."""
     try:
         ip = ipaddress.ip_address(ip_address)
@@ -121,7 +120,7 @@ def _is_trusted_proxy(ip_address: str, trusted_ranges: List[str]) -> bool:
         return False
 
 
-def _get_forwarded_ips(request: Request) -> List[str]:
+def _get_forwarded_ips(request: Request) -> list[str]:
     """Extract IPs from various forwarded headers."""
     ips = []
 
@@ -167,7 +166,7 @@ def delete_url(
     try:
         service.delete_url(shortened_url=shortened_url)
     except Exception as e:
-        logger.error(f"Error deleting URL: {str(e)}")
+        logger.error(f"Error deleting URL: {e!s}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Something went wrong",
