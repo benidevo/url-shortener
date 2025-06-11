@@ -23,8 +23,6 @@ class AnalyticsRepository(ABC):
         raise NotImplementedError
 
 
-
-
 class InMemoryAnalyticsRepository(AnalyticsRepository):
     _instance = None
     _analytics: Dict[str, AnalyticsModel] = {}
@@ -62,15 +60,14 @@ class SqlAlchemyAnalyticsRepository(AnalyticsRepository):
         self.session = db_session
 
     def record_click(self, click: ClickModel, short_link: str) -> AnalyticsModel:
-        db_analytics = self.session.query(Analytics).filter(
-            Analytics.short_link == short_link
-        ).first()
+        db_analytics = (
+            self.session.query(Analytics)
+            .filter(Analytics.short_link == short_link)
+            .first()
+        )
 
         if not db_analytics:
-            db_analytics = Analytics(
-                short_link=short_link,
-                clicks=[]
-            )
+            db_analytics = Analytics(short_link=short_link, clicks=[])
             self.session.add(db_analytics)
 
         db_click = Click.from_model(click)
@@ -82,9 +79,11 @@ class SqlAlchemyAnalyticsRepository(AnalyticsRepository):
         return db_analytics.to_model()
 
     def get_analytics_by_short_link(self, short_link: str) -> Optional[AnalyticsModel]:
-        db_analytics = self.session.query(Analytics).filter(
-            Analytics.short_link == short_link
-        ).first()
+        db_analytics = (
+            self.session.query(Analytics)
+            .filter(Analytics.short_link == short_link)
+            .first()
+        )
 
         if not db_analytics:
             return None

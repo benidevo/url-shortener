@@ -8,6 +8,11 @@ class ClickModel(BaseModel):
     ip: str = Field(..., title="ip", description="The IP address of the click")
     city: str = Field(..., title="city", description="The city of the click")
     country: str = Field(..., title="country", description="The country of the click")
+    created_at: datetime = Field(
+        default_factory=datetime.now,
+        title="created_at",
+        description="When the click occurred",
+    )
 
 
 class AnalyticsModel(BaseModel):

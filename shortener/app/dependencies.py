@@ -19,7 +19,7 @@ def get_session():
         session.close()
 
 
-def get_repository(session = Depends(get_session)) -> UrlRepository:
+def get_repository(session=Depends(get_session)) -> UrlRepository:
     return SqlAlchemyUrlRepository(db_session=session)
 
 

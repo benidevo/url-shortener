@@ -7,7 +7,9 @@ from grpc_reflection.v1alpha import reflection
 
 import app.grpc.protos.analytics_pb2 as analytics_pb2
 from app.grpc.protos.analytics_pb2_grpc import (
-    AnalyticsServiceServicer, add_AnalyticsServiceServicer_to_server)
+    AnalyticsServiceServicer,
+    add_AnalyticsServiceServicer_to_server,
+)
 from app.models import ClickModel
 from app.repository import AnalyticsRepository, SqlAlchemyAnalyticsRepository
 

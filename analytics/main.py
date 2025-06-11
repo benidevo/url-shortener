@@ -6,8 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import Settings, get_settings
-from app.exceptions import (catch_all_exception_handler,
-                            internal_server_error_handler)
+from app.exceptions import catch_all_exception_handler, internal_server_error_handler
 from app.grpc.server import serve
 from app.routes.analytics import router as urls_router
 from app.routes.health import router as health_router

@@ -18,12 +18,14 @@ class Click(Base):
     ip = Column(String, index=True, default="")
     city = Column(String, index=True, default="")
     country = Column(String, index=True, default="")
+    created_at = Column(DateTime, index=True, nullable=False, default=datetime.now)
 
     def to_model(self) -> ClickModel:
-        return ClickModel(
-            ip=self.ip,
-            city=self.city,
-            country=self.country,
+        return ClickModel(  # type: ignore
+            ip=self.ip,  # type: ignore
+            city=self.city,  # type: ignore
+            country=self.country,  # type: ignore
+            created_at=self.created_at,  # type: ignore
         )
 
     @classmethod
@@ -32,10 +34,14 @@ class Click(Base):
             ip=model.ip,
             city=model.city,
             country=model.country,
+            created_at=model.created_at,
         )
 
     def __repr__(self):
-        return f"Click(id={self.id}, ip={self.ip}, city={self.city}, country={self.country})"  # noqa
+        return (
+            f"Click(id={self.id}, ip={self.ip}, city={self.city}, "
+            f"country={self.country}, created_at={self.created_at})"
+        )
 
 
 class Analytics(Base):
@@ -62,4 +68,8 @@ class Analytics(Base):
         )
 
     def __repr__(self):
-        return f"Analytics(id={self.id}, short_link={self.short_link}, updated_at={self.updated_at})"
+        return (
+            f"Analytics(id={self.id}, "
+            f"short_link={self.short_link}, "
+            f"updated_at={self.updated_at})"
+        )

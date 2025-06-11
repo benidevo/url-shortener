@@ -15,14 +15,16 @@ class Url(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     link = Column(Text, nullable=False)
-    short_link = Column(String(7), unique=True, index=True, nullable=False)
+    short_link = Column(String(8), unique=True, index=True, nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.now)
 
     def to_model(self) -> UrlModel:
-        return UrlModel(
-            link=self.link,
-            short_link=self.short_link,
-            created_at=self.created_at
+        from pydantic import HttpUrl
+
+        return UrlModel(  # type: ignore
+            link=HttpUrl(self.link),  # type: ignore
+            short_link=self.short_link,  # type: ignore
+            created_at=self.created_at,  # type: ignore
         )
 
     @classmethod
