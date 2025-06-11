@@ -48,7 +48,7 @@ class Analytics(Base):
     __tablename__ = "analytics"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    short_link = Column(String, index=True, nullable=False)
+    short_link = Column(String(8), index=True, nullable=False)
     updated_at = Column(DateTime, index=True, default=datetime.now)
     clicks = relationship("Click", cascade="all, delete-orphan")
 
