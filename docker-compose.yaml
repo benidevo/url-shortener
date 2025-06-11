@@ -83,6 +83,20 @@ services:
     networks:
       - url-shortener-network
 
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: url-shortener-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - shortener
+      - analytics
+    restart: unless-stopped
+    networks:
+      - url-shortener-network
+
 networks:
   url-shortener-network:
     driver: bridge
