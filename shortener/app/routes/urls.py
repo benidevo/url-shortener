@@ -3,6 +3,7 @@ import logging
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Request, status
 
+from app.constants import SHORT_URL_LENGTH, TRUSTED_PROXY_NETWORKS
 from app.dependencies import get_url_service
 from app.models import ResponseModel, UrlCreate, UrlModel
 from app.service import UrlShortenerService
@@ -46,7 +47,9 @@ def list_urls(service: UrlShortenerService = Depends(get_url_service)):
 @router.get("/{shortened_url}", response_model=ResponseModel)
 def get_url(
     request: Request,
-    shortened_url: str = Path(..., min_length=8, max_length=8),
+    shortened_url: str = Path(
+        ..., min_length=SHORT_URL_LENGTH, max_length=SHORT_URL_LENGTH
+    ),
     service: UrlShortenerService = Depends(get_url_service),
 ):
 
@@ -83,19 +86,11 @@ def _extract_real_ip(request: Request) -> str:
     Extract the real client IP address with proper validation.
     Handles proxy chains and prevents IP spoofing.
     """
-    # List of trusted proxy IP ranges (in production, configure these properly)
-    trusted_proxies = [
-        "127.0.0.0/8",  # localhost
-        "10.0.0.0/8",  # private networks
-        "172.16.0.0/12",  # private networks
-        "192.168.0.0/16",  # private networks
-        "169.254.0.0/16",  # link-local
-    ]
+    # Use trusted proxy networks from constants
 
     direct_ip = request.client.host if request.client else "0.0.0.0"
 
-    # Check if we're behind a trusted proxy
-    if not _is_trusted_proxy(direct_ip, trusted_proxies):
+    if not _is_trusted_proxy(direct_ip, TRUSTED_PROXY_NETWORKS):
         return direct_ip
 
     forwarded_ips = _get_forwarded_ips(request)
@@ -160,7 +155,9 @@ def _is_valid_public_ip(ip_str: str) -> bool:
 
 @router.delete("/{shortened_url}", response_model=ResponseModel)
 def delete_url(
-    shortened_url: str = Path(..., min_length=8, max_length=8),
+    shortened_url: str = Path(
+        ..., min_length=SHORT_URL_LENGTH, max_length=SHORT_URL_LENGTH
+    ),
     service: UrlShortenerService = Depends(get_url_service),
 ):
     try:

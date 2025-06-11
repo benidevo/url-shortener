@@ -1,6 +1,8 @@
+import asyncio
 import logging
 import time
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 from datetime import datetime
 from enum import Enum
 from threading import Lock
@@ -9,6 +11,12 @@ from typing import ClassVar, Optional
 import grpc
 
 from app.config import Settings, get_settings
+from app.constants import (
+    GRPC_BACKOFF_MULTIPLIER,
+    GRPC_MAX_RETRIES,
+    GRPC_RETRY_DELAY_SECONDS,
+    GRPC_TIMEOUT_SECONDS,
+)
 from app.grpc.protos import analytics_pb2, analytics_pb2_grpc
 
 logger = logging.getLogger(__name__)
@@ -28,6 +36,12 @@ class AnalyticsClient(ABC):
     ) -> bool:
         raise NotImplementedError
 
+    @abstractmethod
+    async def record_click_async(
+        self, short_link: str, ip: str = "", city: str = "", country: str = ""
+    ) -> bool:
+        raise NotImplementedError
+
     @classmethod
     @abstractmethod
     def get_instance(cls, target: str | None) -> "AnalyticsClient":
@@ -42,10 +56,10 @@ class GrpcAnalyticsClient(AnalyticsClient):
     RECOVERY_TIMEOUT = 30  # Seconds before trying half-open state
     HALF_OPEN_MAX_ATTEMPTS = 3  # Max attempts in half-open state
 
-    MAX_RETRIES = 3
-    INITIAL_RETRY_DELAY = 0.1  # seconds
-    MAX_RETRY_DELAY = 2.0  # seconds
-    TIMEOUT = 2.0  # seconds
+    MAX_RETRIES = GRPC_MAX_RETRIES
+    INITIAL_RETRY_DELAY = GRPC_RETRY_DELAY_SECONDS  # seconds
+    MAX_RETRY_DELAY = GRPC_RETRY_DELAY_SECONDS * GRPC_BACKOFF_MULTIPLIER  # seconds
+    TIMEOUT = GRPC_TIMEOUT_SECONDS  # seconds
 
     @classmethod
     def get_instance(cls, target: str | None) -> "AnalyticsClient":
@@ -230,10 +244,40 @@ class GrpcAnalyticsClient(AnalyticsClient):
         self._record_failure()
         return False
 
-    def __del__(self):
-        """Cleanup gRPC channel on deletion"""
-        if hasattr(self, "_channel"):
+    async def record_click_async(
+        self, short_link: str, ip: str = "", city: str = "", country: str = ""
+    ) -> bool:
+        """Async version of record_click that runs in a thread pool"""
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            None, self.record_click, short_link, ip, city, country
+        )
+
+    def close(self):
+        """Explicitly close the gRPC channel"""
+        if hasattr(self, "_channel") and self._channel:
             try:
                 self._channel.close()
-            except Exception:
-                pass
+                logger.debug("gRPC channel closed successfully")
+            except Exception as e:
+                logger.warning(f"Error closing gRPC channel: {e}")
+            finally:
+                self._channel = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    @contextmanager
+    @classmethod
+    def get_client(cls, target: str | None = None):
+        """Context manager for creating and cleaning up analytics client"""
+        client = None
+        try:
+            client = cls(target)
+            yield client
+        finally:
+            if client:
+                client.close()

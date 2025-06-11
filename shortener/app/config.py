@@ -5,6 +5,8 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings
 
+from app.constants import DIRECTORY_SEARCH_DEPTH
+
 
 class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
@@ -18,12 +20,16 @@ class Settings(BaseSettings):
 
     ENVIRONMENT: str = "development"
 
+    CACHE_ENABLED: bool = True
+    CACHE_MAX_SIZE: int = 1000
+    CACHE_TTL_SECONDS: int = 300  # 5 minutes
+
     class Config:
         project_root = None
         current_dir = Path(__file__).parent
 
         search_dir = current_dir
-        for _ in range(10):
+        for _ in range(DIRECTORY_SEARCH_DEPTH):
             if (search_dir / "docker-compose.yaml").exists() or (
                 search_dir / ".env.example"
             ).exists():

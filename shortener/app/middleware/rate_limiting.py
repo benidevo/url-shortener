@@ -7,6 +7,8 @@ from typing import Any
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 
+from app.constants import CLEANUP_MAX_AGE_SECONDS
+
 logger = logging.getLogger(__name__)
 
 
@@ -61,7 +63,7 @@ class SlidingWindowRateLimiter:
 
             return is_allowed, headers
 
-    def cleanup_old_entries(self, max_age_seconds: int = 3600):
+    def cleanup_old_entries(self, max_age_seconds: int = CLEANUP_MAX_AGE_SECONDS):
         """
         Clean up old entries to prevent memory leaks.
         Should be called periodically.

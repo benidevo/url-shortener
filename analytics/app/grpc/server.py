@@ -6,6 +6,7 @@ import grpc
 from grpc_reflection.v1alpha import reflection
 
 import app.grpc.protos.analytics_pb2 as analytics_pb2
+from app.constants import GRPC_DEFAULT_PORT, GRPC_THREAD_POOL_WORKERS
 from app.grpc.protos.analytics_pb2_grpc import (
     AnalyticsServiceServicer,
     add_AnalyticsServiceServicer_to_server,
@@ -40,8 +41,10 @@ class AnalyticsService(AnalyticsServiceServicer):
             return analytics_pb2.RecordClickResponse(success=False)
 
 
-def serve(session_factory: Callable, port: int = 50052):
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+def serve(session_factory: Callable, port: int = GRPC_DEFAULT_PORT):
+    server = grpc.server(
+        futures.ThreadPoolExecutor(max_workers=GRPC_THREAD_POOL_WORKERS)
+    )
 
     def get_repository():
         session = session_factory()

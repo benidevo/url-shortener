@@ -1,15 +1,47 @@
+import asyncio
 import logging
+from contextlib import asynccontextmanager
 from http import HTTPMethod as Method
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.exceptions import catch_all_exception_handler, internal_server_error_handler
-from app.middleware.rate_limiting import rate_limit_middleware
+from app.middleware.rate_limiting import cleanup_rate_limiter, rate_limit_middleware
 from app.routes.health import router as health_router
 from app.routes.urls import router as urls_router
 
 logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifespan events"""
+    logger.info("Starting background tasks...")
+    cleanup_task = asyncio.create_task(periodic_cleanup())
+
+    yield
+
+    logger.info("Shutting down background tasks...")
+    cleanup_task.cancel()
+    try:
+        await cleanup_task
+    except asyncio.CancelledError:
+        pass
+
+
+async def periodic_cleanup():
+    """Background task for periodic cleanup operations"""
+    while True:
+        try:
+            await asyncio.sleep(3600)  # Run every hour
+            cleanup_rate_limiter()
+            logger.debug("Periodic cleanup completed")
+        except asyncio.CancelledError:
+            logger.info("Cleanup task cancelled")
+            break
+        except Exception as e:
+            logger.error(f"Error during periodic cleanup: {e}")
 
 
 class AppFactory:
@@ -19,6 +51,7 @@ class AppFactory:
             title="URL Shortener Service",
             description="API for shortening URLs",
             version="0.1.0",
+            lifespan=lifespan,
         )
 
         AppFactory._register_routers(app)
