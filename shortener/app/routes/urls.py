@@ -2,6 +2,7 @@ import ipaddress
 import logging
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Request, status
+from fastapi.responses import RedirectResponse
 
 from app.constants import SHORT_URL_LENGTH, TRUSTED_PROXY_NETWORKS
 from app.dependencies import get_url_service
@@ -170,3 +171,28 @@ def delete_url(
         )
 
     return ResponseModel()
+
+
+@router.get("/redirect/{shortened_url}")
+def redirect_to_url(
+    request: Request,
+    shortened_url: str = Path(
+        ..., min_length=SHORT_URL_LENGTH, max_length=SHORT_URL_LENGTH
+    ),
+    service: UrlShortenerService = Depends(get_url_service),
+):
+    client_ip, city, country = _parse_request(request)
+
+    shorten_url = service.get_url(
+        shortened_url=shortened_url,
+        request_ip=client_ip,
+        city=city,
+        country=country,
+    )
+    if not shorten_url:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="URL not found"
+        )
+
+    # Return a 302 redirect to the original URL
+    return RedirectResponse(url=str(shorten_url.link), status_code=302)

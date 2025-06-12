@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'ui-sans-serif', 'system-ui'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/json-enc.js"></script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div x-data="app()" x-cloak class="min-h-screen flex flex-col">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-sm border-b">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <h1 class="text-xl font-bold text-gray-900">URL Shortener</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button
+                            @click="currentPage = 'shortener'"
+                            :class="currentPage === 'shortener' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'"
+                            class="px-3 py-2 text-sm font-medium border-b-2 border-transparent transition-colors"
+                        >
+                            Shorten URL
+                        </button>
+                        <button
+                            @click="currentPage = 'analytics'"
+                            :class="currentPage === 'analytics' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'"
+                            class="px-3 py-2 text-sm font-medium border-b-2 border-transparent transition-colors"
+                        >
+                            Analytics
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+            <!-- URL Shortener Page -->
+            <div x-show="currentPage === 'shortener'" class="space-y-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Shorten Your URL</h2>
+                    <p class="text-gray-600">Enter a long URL and get a short, shareable link</p>
+                </div>
+
+                <!-- URL Shortener Form -->
+                <div class="max-w-2xl mx-auto">
+                    <form
+                        hx-post="/api/shortener/api/v1/"
+                        hx-target="#shortener-result"
+                        hx-indicator="#shortener-loading"
+                        hx-ext="json-enc"
+                        @submit="showResult = true"
+                        class="space-y-4"
+                    >
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input
+                                type="url"
+                                name="url"
+                                placeholder="Enter your long URL here..."
+                                required
+                                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+                            >
+                            <button
+                                type="submit"
+                                class="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                            >
+                                Shorten
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Loading State -->
+                    <div id="shortener-loading" class="htmx-indicator mt-4">
+                        <div class="flex items-center justify-center space-x-2">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                            <span class="text-gray-600">Shortening URL...</span>
+                        </div>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="shortener-result" class="mt-6"></div>
+                </div>
+
+                <!-- Features Section -->
+                <div class="grid md:grid-cols-3 gap-8 mt-16">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.1m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Easy to Use</h3>
+                        <p class="text-gray-600">Simply paste your long URL and get a short link instantly</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Track Analytics</h3>
+                        <p class="text-gray-600">Get detailed analytics on your shortened URLs</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Reliable</h3>
+                        <p class="text-gray-600">Fast, secure, and always available</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Page -->
+            <div x-show="currentPage === 'analytics'" class="space-y-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">URL Analytics</h2>
+                    <p class="text-gray-600">Enter a shortened URL to view its analytics</p>
+                </div>
+
+                <!-- Analytics Form -->
+                <div class="max-w-2xl mx-auto">
+                    <form
+                        hx-get="/api/analytics/api/v1/{short_link}"
+                        hx-target="#analytics-result"
+                        hx-indicator="#analytics-loading"
+                        hx-swap="innerHTML"
+                        @submit.prevent="submitAnalytics($event)"
+                        class="space-y-4"
+                    >
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input
+                                type="text"
+                                id="analytics-input"
+                                placeholder="Enter short URL or short code..."
+                                required
+                                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+                            >
+                            <button
+                                type="submit"
+                                class="px-8 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+                            >
+                                Get Analytics
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-500">Enter either the full shortened URL or just the short code</p>
+                    </form>
+
+                    <!-- Loading State -->
+                    <div id="analytics-loading" class="htmx-indicator mt-4">
+                        <div class="flex items-center justify-center space-x-2">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                            <span class="text-gray-600">Loading analytics...</span>
+                        </div>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="analytics-result" class="mt-6"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t mt-auto">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <p class="text-center text-gray-500 text-sm">
+                    URL Shortener &copy; 2025. All rights reserved.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Application JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>

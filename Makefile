@@ -16,6 +16,18 @@ into_shortener:
 into_analytics:
 	docker compose -f docker-compose.yaml exec analytics bash
 
+logs-frontend:
+	docker compose -f docker-compose.yaml logs -f frontend
+
+logs-shortener:
+	docker compose -f docker-compose.yaml logs -f shortener
+
+logs-analytics:
+	docker compose -f docker-compose.yaml logs -f analytics
+
+logs-all:
+	docker compose -f docker-compose.yaml logs -f
+
 shortener-lint:
 	docker compose -f docker-compose.yaml exec shortener ruff check .
 
