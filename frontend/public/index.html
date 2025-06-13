@@ -151,7 +151,7 @@
             <div x-show="currentPage === 'analytics'" class="space-y-8">
                 <div class="text-center">
                     <h2 class="text-3xl font-bold text-gray-900 mb-2">URL Analytics</h2>
-                    <p class="text-gray-600">Enter a shortened URL to view its analytics</p>
+                    <p class="text-gray-600">Paste a shortened URL to view its click analytics</p>
                 </div>
 
                 <!-- Analytics Form -->
@@ -165,7 +165,7 @@
                             <input
                                 type="text"
                                 id="analytics-input"
-                                placeholder="Enter short URL or short code..."
+                                placeholder="http://localhost:3000/abc12345"
                                 required
                                 class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
                             >
@@ -176,7 +176,7 @@
                                 Get Analytics
                             </button>
                         </div>
-                        <p class="text-sm text-gray-500">Enter either the full shortened URL or just the short code</p>
+                        <p class="text-sm text-gray-500">Paste the shortened URL you want to analyze</p>
                     </form>
 
                     <!-- Loading State -->

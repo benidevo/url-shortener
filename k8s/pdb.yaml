@@ -1,0 +1,43 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: shortener-pdb
+  namespace: url-shortener
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: shortener
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: analytics-pdb
+  namespace: url-shortener
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: analytics
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: redis-pdb
+  namespace: url-shortener
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: redis
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: postgres-pdb
+  namespace: url-shortener
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: postgres

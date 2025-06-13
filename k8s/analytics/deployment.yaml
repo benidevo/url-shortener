@@ -7,6 +7,11 @@ metadata:
     app: analytics
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   selector:
     matchLabels:
       app: analytics
@@ -15,9 +20,16 @@ spec:
       labels:
         app: analytics
     spec:
+      serviceAccountName: url-shortener-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
       - name: analytics
-        image: gcr.io/url-shortener/analytics:latest
+        image: url-shortener/analytics:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 8000
           name: http
@@ -27,8 +39,60 @@ spec:
             secretKeyRef:
               name: db-credentials
               key: analytics-db-url
+        - name: ANALYTICS_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: analytics-db-url
         - name: ENVIRONMENT
           valueFrom:
             configMapKeyRef:
               name: analytics-config
               key: ENVIRONMENT
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: var-run
+          mountPath: /var/run
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: var-run
+        emptyDir: {}

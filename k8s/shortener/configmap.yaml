@@ -7,4 +7,4 @@ data:
   SERVICE_PORT: "8000"
   ENVIRONMENT: "production"
   LOG_LEVEL: "INFO"
-  ANALYTICS_SERVICE_GRPC: "analytics-service:50051"
+  ANALYTICS_SERVICE_GRPC: "analytics-service.url-shortener.svc.cluster.local:50051"

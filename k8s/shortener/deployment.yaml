@@ -7,6 +7,11 @@ metadata:
     app: shortener
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   selector:
     matchLabels:
       app: shortener
@@ -15,11 +20,24 @@ spec:
       labels:
         app: shortener
     spec:
+      serviceAccountName: url-shortener-sa
+      dnsPolicy: ClusterFirst
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "2"
+        - name: edns0
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
       - name: shortener
-        image: gcr.io/url-shortener/shortener:latest
+        image: url-shortener/shortener:latest
+        imagePullPolicy: Never
         ports:
-        - containerPort: 8080
+        - containerPort: 8000
           name: http
         env:
         - name: DATABASE_URL
@@ -32,3 +50,55 @@ spec:
             configMapKeyRef:
               name: shortener-config
               key: ENVIRONMENT
+        - name: ANALYTICS_SERVICE_GRPC
+          valueFrom:
+            configMapKeyRef:
+              name: shortener-config
+              key: ANALYTICS_SERVICE_GRPC
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: var-run
+          mountPath: /var/run
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: var-run
+        emptyDir: {}
