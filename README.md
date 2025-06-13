@@ -46,7 +46,7 @@ A production-ready distributed URL shortening system with geographic analytics, 
 
 ```bash
 # Clone and deploy everything
-git clone <your-repo-url>
+git clone https://github.com/benidevo/url-shortener
 cd url-shortener
 
 # Deploy to Kubernetes
@@ -69,7 +69,7 @@ make k8s-stop
 
 ```bash
 # Clone and deploy everything
-git clone <your-repo-url>
+git clone https://github.com/benidevo/url-shortener
 cd url-shortener
 ./deploy.sh
 ```
@@ -83,8 +83,9 @@ cd url-shortener
 - ✅ Health verification
 
 **Access the application:**
+
 - Run `make k8s-access` to start port forwarding
-- Visit http://localhost:3000/
+- Visit <http://localhost:3000/>
 
 ### 🎯 Available Make Commands
 
@@ -100,7 +101,6 @@ make k8s-logs       # View logs
 make k8s-stop       # Remove all resources
 make k8s-restart    # Stop and redeploy
 ```
-
 
 ## 📡 API Usage
 
@@ -124,10 +124,33 @@ curl http://localhost:3000/api/analytics/api/v1/abc123
 
 ## 🛠️ Development
 
-### Development Commands
+### Running Tests Locally
 
 ```bash
-# Start development environment
+# One-time setup: Create test environment
+make test-setup
+
+# Run tests
+make test              # Run all tests
+make shortener-test    # Test shortener service only
+make analytics-test    # Test analytics service only
+
+# Clean up when done
+make test-clean        # Remove test environment
+```
+
+### Debugging Deployed Services
+
+```bash
+# Access container shells for debugging
+make shortener-shell   # Access shortener container
+make analytics-shell   # Access analytics container
+```
+
+### Kubernetes Commands
+
+```bash
+# Deploy to local Kubernetes
 make k8s-deploy
 
 # View application status
@@ -169,96 +192,31 @@ make k8s-access
 - Pod resource utilization
 - Service health and availability
 
-## 🌐 Production Deployment
-
-### Cloud Provider Setup
-
-**AWS EKS:**
-
-```bash
-eksctl create cluster --name url-shortener --region us-west-2
-```
-
-**Google GKE:**
-
-```bash
-gcloud container clusters create url-shortener --zone us-central1-a
-```
-
-**Azure AKS:**
-
-```bash
-az aks create --resource-group myResourceGroup --name url-shortener
-```
-
-### Image Registry
-
-```bash
-# Push to your registry
-docker tag url-shortener/shortener:latest your-registry/shortener:latest
-docker push your-registry/shortener:latest
-
-# Update k8s/*/deployment.yaml with your registry URLs
-```
-
 ## 🧪 Testing
 
+### Running Tests in Containers
+
 ```bash
-# Health check
+# Run all tests (inside deployed containers)
+make test
+
+# Run specific service tests
+make shortener-test
+make analytics-test
+
+# Run all quality checks
+make all-checks    # Runs format check, lint, type check, and tests
+```
+
+**Note:** All test commands run inside the deployed Kubernetes containers. Deploy first with `make k8s-deploy`.
+
+### Health Checks (Kubernetes)
+
+```bash
+# Check deployment status
 make k8s-status
 
 # Service health through frontend
 curl http://localhost:3000/api/shortener/health
 curl http://localhost:3000/api/analytics/health
-```
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-**Pods stuck in Pending:**
-
-```bash
-kubectl describe pods -n url-shortener
-kubectl get events -n url-shortener --sort-by='.lastTimestamp'
-```
-
-**Database connection errors:**
-
-```bash
-kubectl logs -f deployment/postgres -n url-shortener
-kubectl exec -it postgres-0 -n url-shortener -- psql -U postgres
-```
-
-**Image pull errors:**
-
-```bash
-# For Docker Desktop Kubernetes (rebuild images)
-docker build -t url-shortener/shortener:latest ./shortener/
-docker build -t url-shortener/analytics:latest ./analytics/
-
-# For cloud deployments
-docker push your-registry/shortener:latest
-```
-
-### Health Checks
-
-```bash
-# Check all services
-./k8s/scripts/check-health.sh
-
-# Individual service logs
-kubectl logs -f deployment/shortener -n url-shortener
-kubectl logs -f deployment/analytics -n url-shortener
-```
-
-## 🧹 Cleanup
-
-```bash
-# Remove all deployment resources
-make k8s-stop
-
-# Or manually remove Kubernetes resources
-kubectl delete namespace url-shortener
-kubectl delete namespace ingress-nginx
 ```

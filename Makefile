@@ -8,7 +8,11 @@ help:
 	@echo "  make k8s-status     - Check deployment status"
 	@echo "  make k8s-stop       - Remove all resources"
 	@echo ""
-	@echo "For detailed command list: make k8s-help"
+	@echo "Testing:"
+	@echo "  make test-setup     - Set up local test environment"
+	@echo "  make test           - Run all tests locally"
+	@echo ""
+	@echo "For detailed command list: make k8s-help or make dev-help"
 
 
 ##
@@ -144,3 +148,63 @@ k8s-restart: k8s-cleanup-force
 	@echo ""
 	@echo "🔄 Redeploying application..."
 	@$(MAKE) k8s-deploy
+
+##
+## Development Commands
+##
+
+.PHONY: dev-help test shortener-test analytics-test test-setup test-clean shortener-shell analytics-shell
+
+# Show development help
+dev-help:
+	@echo "🛠️  URL Shortener - Development Commands"
+	@echo ""
+	@echo "Testing:"
+	@echo "  make test-setup     - Set up Python virtual environments for testing"
+	@echo "  make test           - Run all tests"
+	@echo "  make shortener-test - Test shortener service"
+	@echo "  make analytics-test - Test analytics service"
+	@echo "  make test-clean     - Remove test virtual environments"
+	@echo ""
+	@echo "Container Access (for debugging deployed services):"
+	@echo "  make shortener-shell - Access shortener container shell"
+	@echo "  make analytics-shell - Access analytics container shell"
+
+# Setup test environment
+test-setup:
+	@echo "🔧 Setting up test environment..."
+	@echo "Creating virtual environment for shortener tests..."
+	@cd shortener && python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
+	@echo "Creating virtual environment for analytics tests..."
+	@cd analytics && python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
+	@echo "✅ Test environment ready!"
+	@echo ""
+	@echo "You can now run: make test"
+
+# Test commands
+shortener-test:
+	@echo "🧪 Running shortener tests..."
+	@cd shortener && ./venv/bin/python -m pytest tests/ -v || echo "Virtual environment not found. Run 'make test-setup' first."
+
+analytics-test:
+	@echo "🧪 Running analytics tests..."
+	@cd analytics && ./venv/bin/python -m pytest tests/ -v || echo "Virtual environment not found. Run 'make test-setup' first."
+
+test: shortener-test analytics-test
+
+
+# Clean test environment
+test-clean:
+	@echo "🧹 Cleaning test environment..."
+	@rm -rf shortener/venv analytics/venv
+	@echo "✅ Test virtual environments removed"
+
+# Access shortener container shell
+shortener-shell:
+	@echo "🐚 Accessing shortener container..."
+	@kubectl exec -it deployment/shortener -n url-shortener -- /bin/bash || echo "Shortener deployment not found. Run 'make k8s-deploy' first."
+
+# Access analytics container shell
+analytics-shell:
+	@echo "🐚 Accessing analytics container..."
+	@kubectl exec -it deployment/analytics -n url-shortener -- /bin/bash || echo "Analytics deployment not found. Run 'make k8s-deploy' first."
