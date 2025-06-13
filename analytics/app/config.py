@@ -1,27 +1,8 @@
 import logging
 import sys
 from functools import lru_cache
-from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-
-def _get_env_file() -> str:
-    """Get the path to the .env file by searching up the directory tree."""
-    current_dir = Path(__file__).parent
-    search_dir = current_dir
-
-    for _ in range(10):
-        if (search_dir / "docker-compose.yaml").exists() or (
-            search_dir / ".env.example"
-        ).exists():
-            return str(search_dir / ".env")
-        parent = search_dir.parent
-        if parent == search_dir:
-            break
-        search_dir = parent
-
-    return ".env"
 
 
 class Settings(BaseSettings):
@@ -40,8 +21,6 @@ class Settings(BaseSettings):
     GRPC_PORT: int = 50051
 
     model_config = SettingsConfigDict(
-        env_file=_get_env_file(),
-        env_file_encoding="utf-8",
         case_sensitive=True,
     )
 

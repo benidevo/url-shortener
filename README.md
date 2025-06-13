@@ -99,32 +99,10 @@ make k8s-status     # Check status
 make k8s-logs       # View logs
 make k8s-stop       # Remove all resources
 make k8s-restart    # Stop and redeploy
-
-# Docker Compose (local development)
-make build          # Build and start services
-make up             # Start services
-make down           # Stop services
-make test           # Run tests
 ```
 
-### Alternative: Local Development (Docker Compose)
-
-For simple local development without Kubernetes:
-
-```bash
-# Start all services with Docker Compose
-docker compose up --build -d
-make db-init-and-migrate
-
-# Access services directly
-- Shortener API: http://localhost:8000/docs
-- Analytics API: http://localhost:8001/docs
-- Frontend: http://localhost:3000
-```
 
 ## 📡 API Usage
-
-### Kubernetes Deployment (Recommended)
 
 After deploying with `make k8s-deploy`, access via the frontend at **<http://localhost:3000>**:
 
@@ -136,51 +114,30 @@ open http://localhost:3000
 curl -X POST http://localhost:3000/api/shortener/api/v1/ \
   -H "Content-Type: application/json" \
   -d '{"url": "https://github.com/your-awesome-project"}'
-```
-
-### Docker Compose (Local Development)
-
-When using `docker compose up`, services are accessible on individual ports:
-
-```bash
-# Create short URL (direct API access)
-curl -X POST http://localhost:8000/api/v1/ \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://github.com/your-awesome-project"}'
 
 # Access short URL
-curl -L http://localhost:8000/api/v1/abc123
+curl -L http://localhost:3000/abc123
 
 # Get analytics
-curl http://localhost:8001/api/v1/abc123
-
-# Frontend UI
-open http://localhost:3000
+curl http://localhost:3000/api/analytics/api/v1/abc123
 ```
 
 ## 🛠️ Development
 
-### Local Development Commands
+### Development Commands
 
 ```bash
 # Start development environment
-make up
+make k8s-deploy
 
-# Run database migrations
-make db-migrate
+# View application status
+make k8s-status
 
-# Format code
-make format
+# View service logs
+make k8s-logs
 
-# Run tests
-make test
-
-# Access service shells
-make into_shortener
-make into_analytics
-
-# View logs
-make logs
+# Access the application
+make k8s-access
 ```
 
 ### Project Structure
@@ -192,8 +149,7 @@ make logs
 │   ├── scripts/       # Deployment automation
 │   └── storage/       # StatefulSets for databases
 ├── frontend/          # Simple web interface
-├── proto/             # gRPC protocol definitions
-└── docker-compose.yaml
+└── proto/             # gRPC protocol definitions
 ```
 
 ## 🔒 Security Features
@@ -248,21 +204,12 @@ docker push your-registry/shortener:latest
 ## 🧪 Testing
 
 ```bash
-# Unit tests
-make test-unit
-
-# Integration tests
-make test-integration
-
-# Load testing
-make test-load
-
-# Health check (Docker Compose)
-curl http://localhost:8000/health
-curl http://localhost:8001/health
-
-# Health check (Kubernetes)
+# Health check
 make k8s-status
+
+# Service health through frontend
+curl http://localhost:3000/api/shortener/health
+curl http://localhost:3000/api/analytics/health
 ```
 
 ## 🚨 Troubleshooting
@@ -308,12 +255,10 @@ kubectl logs -f deployment/analytics -n url-shortener
 ## 🧹 Cleanup
 
 ```bash
-# Stop port forwarding
-./k8s/scripts/stop-port-forward.sh
+# Remove all deployment resources
+make k8s-stop
 
-# Remove Kubernetes resources
+# Or manually remove Kubernetes resources
 kubectl delete namespace url-shortener
-
-# Stop local development
-make down_volumes
+kubectl delete namespace ingress-nginx
 ```
