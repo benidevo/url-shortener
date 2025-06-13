@@ -107,7 +107,7 @@ test-cov: shortener-test-cov analytics-test-cov
 ## Kubernetes Deployment Commands
 ##
 
-.PHONY: k8s-help k8s-deploy k8s-status k8s-logs k8s-cleanup k8s-stop k8s-restart
+.PHONY: k8s-help k8s-deploy k8s-access k8s-status k8s-logs k8s-cleanup k8s-stop k8s-restart
 
 # Show Kubernetes help
 k8s-help:
@@ -115,6 +115,7 @@ k8s-help:
 	@echo ""
 	@echo "Kubernetes commands:"
 	@echo "  make k8s-deploy     - Deploy the complete application to Kubernetes"
+	@echo "  make k8s-access     - Start port forwarding to access the application"
 	@echo "  make k8s-status     - Check the status of all services"
 	@echo "  make k8s-logs       - Show logs from all services"
 	@echo "  make k8s-cleanup    - Remove ALL resources created by deployment"
@@ -123,12 +124,19 @@ k8s-help:
 	@echo ""
 	@echo "📡 After deployment, access the application at:"
 	@echo "  • Frontend: http://localhost:3000/"
-	@echo "  • Grafana:  http://localhost:3000/grafana/"
 
 # Deploy the complete application to Kubernetes
 k8s-deploy:
 	@echo "🚀 Deploying URL Shortener to Kubernetes..."
 	@./deploy.sh
+
+# Start port forwarding to access the application
+k8s-access:
+	@echo "🌐 Starting port forwarding to access the application..."
+	@echo "📡 Application will be available at: http://localhost:3000/"
+	@echo "Press Ctrl+C to stop port forwarding"
+	@echo ""
+	kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 3000:3000
 
 # Check status of all Kubernetes resources
 k8s-status:

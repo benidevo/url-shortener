@@ -166,8 +166,6 @@ log_info "Waiting for all deployments to be ready..."
 kubectl wait --for=condition=available --timeout=300s deployment/shortener -n url-shortener || true
 kubectl wait --for=condition=available --timeout=300s deployment/analytics -n url-shortener || true
 kubectl wait --for=condition=available --timeout=300s deployment/frontend -n url-shortener || true
-kubectl wait --for=condition=available --timeout=300s deployment/prometheus -n url-shortener || true
-kubectl wait --for=condition=available --timeout=300s deployment/grafana -n url-shortener || true
 
 log_info "Waiting for StatefulSets to be ready..."
 kubectl wait --for=condition=ready --timeout=300s pod -l app=redis -n url-shortener || true
@@ -181,8 +179,8 @@ echo ""
 log_header "8/10 Initializing Databases"
 
 log_info "Creating databases..."
-kubectl exec -it postgres-0 -n url-shortener -- psql -U postgres -d postgres -c "CREATE DATABASE shortener_db;" 2>/dev/null || log_info "shortener_db already exists"
-kubectl exec -it postgres-0 -n url-shortener -- psql -U postgres -d postgres -c "CREATE DATABASE analytics_db;" 2>/dev/null || log_info "analytics_db already exists"
+kubectl exec -it postgres-0 -n url-shortener -- psql -U postgres -d postgres -c "CREATE DATABASE shortener;" 2>/dev/null || log_info "shortener already exists"
+kubectl exec -it postgres-0 -n url-shortener -- psql -U postgres -d postgres -c "CREATE DATABASE analytics;" 2>/dev/null || log_info "analytics already exists"
 
 log_info "Running database migrations..."
 kubectl exec -it deployment/shortener -n url-shortener -- python -m alembic upgrade head 2>/dev/null || log_info "Shortener migrations completed"
@@ -192,60 +190,30 @@ log_info "✓ Database initialization complete"
 
 echo ""
 
-# Step 9: Setup Ingress Access
-log_header "9/10 Setting Up Ingress Access"
-
-# Port forward ingress controller to port 3000
-log_info "Setting up ingress access on port 3000..."
-kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 3000:3000 &
-PF_PID=$!
-sleep 3
-
-INGRESS_URL="http://localhost:3000"
-log_info "✓ Ingress is available at $INGRESS_URL"
-
-echo ""
-
-# Step 10: Verify deployment
-log_header "10/10 Verifying Deployment"
+# Step 9: Verify deployment
+log_header "9/9 Verifying Deployment"
 
 echo ""
 echo "🎉 Deployment Complete!"
 echo "=================================================="
 echo ""
-echo "📡 Access Points (via Ingress):"
-echo "  • Frontend:         $INGRESS_URL/"
-echo "  • Grafana:          $INGRESS_URL/grafana"
-echo "  • Short URLs:       $INGRESS_URL/s/{short_code}"
+echo "📡 To access the application:"
+echo "  1. Start port forwarding: kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 3000:3000"
+echo "  2. Access frontend: http://localhost:3000/"
+echo "  3. Short URLs: http://localhost:3000/s/{short_code}"
 echo ""
-echo "📡 API Endpoints (for development):"
-echo "  • Shortener API:    $INGRESS_URL/api/shortener/docs"
-echo "  • Analytics API:    $INGRESS_URL/api/analytics/docs"
+echo "🔧 Management Commands:"
+echo "  • Start port forwarding: make k8s-access"
+echo "  • View logs:             make k8s-logs"
+echo "  • Check status:          make k8s-status"
+echo "  • Cleanup:               make k8s-stop"
 echo ""
-echo "🧪 Quick Test:"
-echo "  # Create a short URL via API"
-echo "  curl -X POST $INGRESS_URL/api/shortener/ \\"
+echo "🧪 Quick Test (after port forwarding):"
+echo "  curl -X POST http://localhost:3000/api/shortener/api/v1/ \\"
 echo "    -H \"Content-Type: application/json\" \\"
 echo "    -d '{\"url\": \"https://github.com/your-awesome-project\"}'"
 echo ""
-echo "  # Or use the web interface at $INGRESS_URL/"
-echo ""
-echo "🔧 Management Commands:"
-echo "  • Check health:     ./k8s/scripts/check-health.sh"
-echo "  • View logs:        kubectl logs -f deployment/shortener -n url-shortener"
-echo "  • Cleanup:          kubectl delete namespace url-shortener"
-echo ""
 echo "=================================================="
 echo ""
-log_info "All services are accessible via the ingress controller at $INGRESS_URL"
-echo ""
-
-# Keep script running to maintain port forwarding
-log_info "Port forwarding is active. Press Ctrl+C to stop."
-echo ""
-
-# Trap Ctrl+C to cleanup
-trap 'log_info "Stopping port forwarding..."; kill $PF_PID 2>/dev/null; exit 0' INT
-
-# Keep the script running
-wait $PF_PID
+log_info "✓ Deployment completed successfully!"
+log_info "Run 'make k8s-access' to start port forwarding and access the application"

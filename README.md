@@ -12,7 +12,6 @@ A production-ready distributed URL shortening system with geographic analytics, 
 - **Analytics Service**: gRPC-enabled service for usage analytics and geographic tracking
 - **PostgreSQL**: Persistent storage with separate databases per service
 - **Redis**: Caching layer for improved performance
-- **Prometheus + Grafana**: Monitoring and observability stack
 
 ### Key Features
 
@@ -31,8 +30,6 @@ A production-ready distributed URL shortening system with geographic analytics, 
 
 ✅ **Observability & Monitoring**
 
-- Prometheus metrics collection
-- Grafana dashboards
 - Structured logging with correlation IDs
 
 ## 🚀 Quick Start
@@ -55,6 +52,9 @@ cd url-shortener
 # Deploy to Kubernetes
 make k8s-deploy
 
+# Start port forwarding to access the application
+make k8s-access
+
 # Check status
 make k8s-status
 
@@ -74,14 +74,17 @@ cd url-shortener
 ./deploy.sh
 ```
 
-**Both options handle:**
+**Deployment handles:**
 
 - ✅ Prerequisites checking
 - ✅ Docker image building
 - ✅ Database credentials creation
 - ✅ Kubernetes deployment
-- ✅ Port forwarding setup
 - ✅ Health verification
+
+**Access the application:**
+- Run `make k8s-access` to start port forwarding
+- Visit http://localhost:3000/
 
 ### 🎯 Available Make Commands
 
@@ -91,6 +94,7 @@ make help
 
 # Kubernetes deployment
 make k8s-deploy     # Deploy everything
+make k8s-access     # Start port forwarding for access
 make k8s-status     # Check status
 make k8s-logs       # View logs
 make k8s-stop       # Remove all resources
@@ -186,7 +190,6 @@ make logs
 ├── analytics/          # Analytics service
 ├── k8s/               # Kubernetes manifests
 │   ├── scripts/       # Deployment automation
-│   ├── monitoring/    # Prometheus & Grafana
 │   └── storage/       # StatefulSets for databases
 ├── frontend/          # Simple web interface
 ├── proto/             # gRPC protocol definitions
@@ -202,14 +205,6 @@ make logs
 - **Secret management** for sensitive data
 
 ## 📊 Monitoring & Observability
-
-### Access Monitoring Stack
-
-```bash
-# With port-forwarding enabled
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000 (admin:admin123)
-```
 
 ### Key Metrics
 

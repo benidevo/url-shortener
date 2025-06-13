@@ -66,8 +66,6 @@ kubectl apply -f shortener/
 kubectl apply -f analytics/
 kubectl apply -f frontend/
 
-log_info "Setting up monitoring..."
-kubectl apply -f monitoring/
 
 log_info "Creating Pod Disruption Budgets..."
 kubectl apply -f pdb.yaml
@@ -79,8 +77,6 @@ log_info "Waiting for deployments to be ready..."
 kubectl wait --for=condition=available --timeout=300s deployment/shortener -n url-shortener
 kubectl wait --for=condition=available --timeout=300s deployment/analytics -n url-shortener
 kubectl wait --for=condition=available --timeout=300s deployment/frontend -n url-shortener
-kubectl wait --for=condition=available --timeout=300s deployment/prometheus -n url-shortener
-kubectl wait --for=condition=available --timeout=300s deployment/grafana -n url-shortener
 
 log_info "Waiting for StatefulSets to be ready..."
 kubectl wait --for=condition=ready --timeout=300s pod -l app=redis -n url-shortener
@@ -91,8 +87,6 @@ log_info "Deployment completed successfully!"
 log_info "Service endpoints:"
 echo "  Shortener Service: kubectl port-forward service/shortener-service 8000:80 -n url-shortener"
 echo "  Analytics Service: kubectl port-forward service/analytics-service 8001:80 -n url-shortener"
-echo "  Prometheus: kubectl port-forward service/prometheus-service 9090:9090 -n url-shortener"
-echo "  Grafana: kubectl port-forward service/grafana-service 3000:3000 -n url-shortener"
 
 log_info "Use './scripts/port-forward.sh' to set up port forwarding"
 log_info "Use './scripts/check-health.sh' to monitor health"
