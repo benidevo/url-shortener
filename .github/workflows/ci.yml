@@ -9,6 +9,30 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: runner
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+          
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
 
     steps:
     - name: Checkout
@@ -19,8 +43,10 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Install Python dependencies
+    - name: Install dependencies
       run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
         python -m pip install --upgrade pip
         pip install -r shortener/requirements.txt
         pip install -r analytics/requirements.txt
@@ -40,18 +66,30 @@ jobs:
         cd shortener && mypy .
         cd ../analytics && mypy .
 
-    - name: Run tests
+    - name: Set up test databases
       run: |
-        cp .env.example .env
-        docker compose up -d postgres redis
-        sleep 10
-        docker compose up --build -d shortener analytics
-        sleep 15
-        docker compose exec shortener alembic upgrade head
-        docker compose exec analytics alembic upgrade head
-        docker compose exec shortener python -m pytest tests/ -v
-        docker compose exec analytics python -m pytest tests/ -v
-
-    - name: Cleanup
-      if: always()
-      run: docker compose down -v
+        createdb shortener_test
+        createdb analytics_test
+      env:
+        PGHOST: localhost
+        PGPORT: 5432
+        PGUSER: runner
+        
+    - name: Run shortener tests
+      env:
+        DATABASE_URL: postgresql://runner@localhost/shortener_test
+        ANALYTICS_SERVICE_GRPC: localhost:50051
+        REDIS_URL: redis://localhost:6379/0
+      run: |
+        cd shortener
+        alembic upgrade head
+        python -m pytest tests/ -v
+        
+    - name: Run analytics tests
+      env:
+        ANALYTICS_DATABASE_URL: postgresql://runner@localhost/analytics_test
+        DATABASE_URL: postgresql://runner@localhost/analytics_test
+      run: |
+        cd analytics
+        alembic upgrade head
+        python -m pytest tests/ -v
