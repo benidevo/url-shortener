@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.get("/{short_link}", response_model=ResponseModel)
 def get_analytics(
-    short_link: str = Path(..., min_length=7, max_length=7),
+    short_link: str = Path(..., min_length=8, max_length=8),
     service: AnalyticsService = Depends(get_analytics_service),
 ) -> ResponseModel:
     analytics = service.retrieve_analytics(short_link)

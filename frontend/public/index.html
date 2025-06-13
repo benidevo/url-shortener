@@ -31,6 +31,9 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/json-enc.js"></script>
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
     <style>
         [x-cloak] { display: none !important; }
     </style>
@@ -154,10 +157,7 @@
                 <!-- Analytics Form -->
                 <div class="max-w-2xl mx-auto">
                     <form
-                        hx-get="/api/analytics/api/v1/{short_link}"
-                        hx-target="#analytics-result"
-                        hx-indicator="#analytics-loading"
-                        hx-swap="innerHTML"
+                        id="analytics-form"
                         @submit.prevent="submitAnalytics($event)"
                         class="space-y-4"
                     >
