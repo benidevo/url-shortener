@@ -4,7 +4,7 @@ A production-ready distributed URL shortening system with geographic analytics, 
 
 ## 🏗️ Architecture
 
-![Architecture Diagram](architecture.png)
+![Architecture Diagram](architecture.jpg)
 
 ### Core Components
 
@@ -182,15 +182,6 @@ make k8s-access
 - **RBAC** with minimal permissions
 - **Resource limits** and security contexts
 - **Secret management** for sensitive data
-
-## 📊 Monitoring & Observability
-
-### Key Metrics
-
-- HTTP request rates and latency
-- Database connection pool status
-- Pod resource utilization
-- Service health and availability
 
 ## 🧪 Testing
 
